@@ -6,7 +6,12 @@ readme = "README.md"
 requires-python = ">=3.14"
 license = "BSD-3-Clause"
 authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
-dependencies = []
+dependencies = [
+  "fastapi>0.139.1",
+  "pydantic~=2.13",
+  "pydantic-settings~=2.14",
+  "uvicorn[standard]~=0.49",
+]
 
 [project.urls]
 Repository = "https://github.com/dave-shawley/fastapi-runner"
@@ -14,6 +19,7 @@ Repository = "https://github.com/dave-shawley/fastapi-runner"
 [dependency-groups]
 dev = [
   "coverage~=7.15",
+  "httpx2~=2.13",
   "pre-commit~=4.6",
   "pyrefly~=1.2",
   "pytest~=9.1",
@@ -33,8 +39,10 @@ branch = true
 source = ["src"]
 
 [tool.pyrefly]
+errors = { missing-override-decorator = false }
 infer-return-types = "never"
 min-severity = "warn"
+preset = "strict"
 python-version = "3.14"
 use-ignore-files = true  # just in case someone changes the default
 
@@ -85,6 +93,7 @@ select = [
 ]
 ignore = [
   "RSE102",  # I like to raise exception instances not classes
+  "TC001",  # I don't like separating imports for type checking
   "TC002",  # I don't like separating imports for type checking
   "TC003",  # This doesn't work with pydantic
   "TRY003",  # Allow messages in exception initializers
