@@ -1,0 +1,3 @@
+APPLICATION=example-app
+UVICORN_ACCESS_LOG=no
+UVICORN_LOG_CONFIG=../../packaging/log-config.json

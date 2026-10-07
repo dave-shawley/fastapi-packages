@@ -1,0 +1,22 @@
+[project]
+name = "example-app"
+version = "0.0.0"
+description = "Example application using this framework"
+requires-python = ">= 3.14"
+license = "BSD-3-Clause"
+authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
+dependencies = ["fastapi-runner", "uvicorn[standard]", "uvloop"]
+
+[project.entry-points.fastapi_runner]
+configure = "example.app:configure"
+lifespans = "example.app:lifespans"
+
+[build-system]
+requires = ["hatchling~=1.26"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["example"]
+
+[tool.uv.sources]
+fastapi-runner = { path = "../../libraries/fastapi-runner/" }

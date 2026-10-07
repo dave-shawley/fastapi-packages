@@ -4,7 +4,7 @@
 [doc("Set up a newly cloned repo")]
 @setup:
     command -v dprint>/dev/null || ( echo 'Install dprint from https://dprint.dev'; exit 1 )
-    uv sync --quiet --all-extras --all-groups --frozen
+    uv sync --quiet --all-extras --all-groups --all-packages --frozen
     uv run pre-commit install --install-hooks --overwrite >/dev/null
 
 [doc("Run static analysis tools")]
@@ -26,4 +26,6 @@ test *ARGS: setup
 
 [doc("Build distributions")]
 build: setup
-    uv build --sdist --wheel --clear
+    uv build --package=fastapi-runner --sdist --wheel --clear
+    docker build -f packaging/Dockerfile --target builder -t dave-shawley/fastapi-builder:local .
+    docker build -f packaging/Dockerfile --target webapp --build-arg APPLICATION=example-app -t dave-shawley/fastapi-example-app:local .

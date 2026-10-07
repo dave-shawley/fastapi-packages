@@ -1,0 +1,13 @@
+[project]
+name = "fastapi-runner"
+version = "0.0.0"
+description = "Production-ready uvicorn runner for FastAPI applications"
+readme = "README.md"
+requires-python = ">=3.14"
+license = "BSD-3-Clause"
+authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
+dependencies = ["fastapi", "pydantic", "pydantic-settings"]
+
+[build-system]
+requires = ["hatchling~=1.26"]
+build-backend = "hatchling.build"
