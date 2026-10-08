@@ -14,7 +14,7 @@
   },
   "formatters": {
     "access": {
-      "format": "%(asctime)s %(levelname)s %(name)s: %(client)s - \"%(method)s %(path)s HTTP/%(http_version)s\" %(status_code)s"
+      "format": "%(asctime)s %(levelname)s %(name)s: %(client)s - \"%(method)s %(path)s HTTP/%(http_version)s\" %(status_code)s %(bytes_sent)s"
     },
     "readable": {
       "format": "%(asctime)s %(levelname)s %(name)s: %(message)s"

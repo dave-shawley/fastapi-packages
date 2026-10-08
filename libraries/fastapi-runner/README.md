@@ -47,9 +47,22 @@ Applications and tests that do not need distribution-based discovery can use
 `create_app()` directly:
 
 ```python
-from fastapi_runner.entrypoint import create_app
+from collections import abc
 
-app = create_app(
+import fastapi
+import fastapi_runner.entrypoint
+import fastapi_runner.lifespan
+
+
+def configure(app: fastapi.FastAPI) -> None:
+    """Add application-specific behavior."""
+
+
+def lifespans() -> abc.Generator[fastapi_runner.lifespan.LifespanHook]:
+    """Yield the application lifespan hooks."""
+
+
+app = fastapi_runner.entrypoint.create_app(
     configure=configure,
     lifespan_generator=lifespans,
 )
@@ -67,6 +80,7 @@ Applications can use `fastapi_runner.lifespan.LifespanMap` as a FastAPI
 dependency to retrieve the value returned by a registered lifespan hook:
 
 ```python
+import contextlib
 import typing as t
 
 import fastapi
@@ -74,11 +88,20 @@ import fastapi
 from fastapi_runner.lifespan import LifespanMap
 
 
+class State:
+    """State that is maintained for the application lifetime."""
+
+
+@contextlib.asynccontextmanager
+async def state_lifespan() -> t.AsyncGenerator[State]:
+    yield State()
+
+
 def get_state(*, lifespan: LifespanMap) -> t.Any:
     return lifespan.get_state(state_lifespan)
 
 
-def status(*, state: t.Annotated[t.Any, fastapi.Depends(get_state)]) -> t.Any:
+def status(*, state: t.Annotated[State, fastapi.Depends(get_state)]) -> State:
     return state
 ```
 
@@ -89,6 +112,43 @@ handlers also allow an application to update the generated body through the
 
 Use `fastapi_runner.middleware.disable_access_log` on an endpoint when its
 requests should not produce an access-log record.
+
+## Customization
+
+### Logging
+
+The default logging configuration is based on the
+[Common Logging Format](https://en.wikipedia.org/wiki/Common_Log_Format). The
+`fastapi_runner.middleware.AccessLogMiddleware` uses the logger named
+`api-runner.access` to log access records. I decided to push the field
+configuration into the logging configuration (see packaging/log-config.json)
+though I may change that in the future depending on ergonomics. The current
+implemention creates a log record with the following custom fields that are
+accessed using `%(name)s` in the format record.
+
+| Field              | Description                                       |
+| ------------------ | ------------------------------------------------- |
+| `%(bytes_sent)s`   | Number of bytes sent in the response              |
+| `%(client)s`       | Formatted client address                          |
+| `%(duration)s`     | Formatted duration of the request in milliseconds |
+| `%(http_version)s` | HTTP version                                      |
+| `%(method)s`       | HTTP request method                               |
+| `%(path)s`         | Request path                                      |
+| `%(status_code)s`  | Numeric status code or `-`                        |
+| `%(user_agent)s`   | User agent string or `-`                          |
+
+The formatted lines as configured by _packaging/log-config.json_ look like:
+
+```
+2026-10-08 11:44:26,328 WARNING api-runner.access: 192.168.215.1:52540 - "GET /missing HTTP/1.1" 404 22
+```
+
+I moved the date out of the log message so that it fits into the general log format.
+You can customize the message format to fit your needs by adjusting the formatter
+attached to the `api-runner.access` logger.
+
+**WARNING**: The only way to currently disable access logging is to set the level
+of the `api-runner.access` logger to `CRITICAL`.
 
 ## Development
 
