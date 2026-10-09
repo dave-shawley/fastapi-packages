@@ -1,18 +1,24 @@
 import contextlib
-import os
 import typing as t
 from collections import abc
 from importlib import metadata
 
 import fastapi.exceptions
 import fastapi.middleware.cors
+import pydantic
 import pydantic_settings
 
 from fastapi_runner import error_handling, errors, lifespan, middleware, types
 
 
+class ApplicationSettings(pydantic_settings.BaseSettings):
+    model_config = {'env_prefix': 'FASTAPI_RUNNER_'}
+    application: str
+    access_log: bool = True
+
+
 class CORSSettings(pydantic_settings.BaseSettings):
-    model_config = {'env_prefix': 'CORS_'}
+    model_config = {'env_prefix': 'FASTAPI_RUNNER_CORS_'}
     allow_credentials: bool = False
     allow_headers: list[str] = []
     allow_methods: list[str] = [
@@ -44,19 +50,13 @@ def app_factory() -> fastapi.FastAPI:
     named `configure` and (optionally) `lifespans` that match
     the `ConfigHook` and `LifespanGenerator` types.
     """
+    settings = _get_application_settings()
     try:
-        application = os.environ['APPLICATION']
-    except KeyError:
-        raise errors.ApplicationConfigurationError(
-            'APPLICATION environment variable is required'
-        ) from None
-
-    try:
-        distribution = metadata.distribution(application)
+        distribution = metadata.distribution(settings.application)
     except metadata.PackageNotFoundError:
         raise errors.ApplicationConfigurationError(
-            f'APPLICATION={application!r} does not identify an installed '
-            'Python distribution'
+            f'APPLICATION={settings.application!r} does not identify an '
+            'installed Python distribution'
         ) from None
 
     configure, lifespan_generator = _load_hooks(distribution)
@@ -64,6 +64,7 @@ def app_factory() -> fastapi.FastAPI:
     return create_app(
         configure=configure,
         lifespan_generator=lifespan_generator,
+        enable_access_log=settings.access_log,
     )
 
 
@@ -71,6 +72,7 @@ def create_app(
     *,
     configure: ConfigHook | None = None,
     lifespan_generator: LifespanGenerator | None = None,
+    enable_access_log: bool = True,
 ) -> fastapi.FastAPI:
     """Create a FastAPI application instance using hooks
 
@@ -82,6 +84,7 @@ def create_app(
     Args:
         configure: A hook that configures the application.
         lifespan_generator: A generator that yields lifespan hooks.
+        enable_access_log: Enable the access logging middleware?
 
     Returns:
         A FastAPI application instance.
@@ -131,12 +134,41 @@ def create_app(
     )
 
     # The AccessLogMiddleware should ALWAYS be added last
-    app.add_middleware(
-        middleware.AccessLogMiddleware,
-        ignored_paths=('/docs', '/openapi.json', '/redoc'),
-    )
+    if enable_access_log:
+        app.add_middleware(
+            middleware.AccessLogMiddleware,
+            ignored_paths=('/docs', '/openapi.json', '/redoc'),
+        )
 
     return app
+
+
+def _get_application_settings() -> ApplicationSettings:
+    """Retrieve the application settings or fail with a useful message."""
+    try:
+        return ApplicationSettings()
+    except pydantic.ValidationError as error:
+        prefix = ApplicationSettings.model_config['env_prefix']
+        missing = set[str]()
+        invalid = set[str]()
+        for e in error.errors():
+            if e['type'] == 'missing':
+                missing.add(str(e['loc'][0]))
+            else:
+                invalid.add(str(e['loc'][0]))
+        if missing:
+            names = ' '.join(f'{prefix}{name.upper()}' for name in missing)
+            raise errors.ApplicationConfigurationError(
+                f'Missing required environment variables: {names}'
+            ) from None
+        if invalid:
+            names = ' '.join(f'{prefix}{name.upper()}' for name in invalid)
+            raise errors.ApplicationConfigurationError(
+                f'Invalid environment variables: {names}'
+            ) from None
+        raise errors.ApplicationConfigurationError(
+            'Unknown error loading application settings'
+        ) from None  # pragma: no cover -- paranoia
 
 
 def _load_hooks(

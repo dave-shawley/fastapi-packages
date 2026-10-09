@@ -12,7 +12,7 @@ for a future PyPI release.
 
 ## Application discovery
 
-`app_factory()` selects an installed application using the `APPLICATION`
+`app_factory()` selects an installed application using the `FASTAPI_RUNNER_APPLICATION`
 environment variable. The value is a Python distribution name, not a module
 path. That distribution must define exactly one `configure` entry point in the
 `fastapi_runner` group and may define a `lifespans` entry point.
@@ -34,11 +34,11 @@ The hooks are called as follows:
 Run the generic factory with Uvicorn:
 
 ```console
-APPLICATION=my-app uvicorn \
+FASTAPI_RUNNER_APPLICATION=my-app uvicorn \
   --factory fastapi_runner.entrypoint:app_factory
 ```
 
-The distribution named by `APPLICATION` and `fastapi-runner` must both be
+The distribution named by `FASTAPI_RUNNER_APPLICATION` and `fastapi-runner` must both be
 installed in the environment.
 
 ## Creating an application directly
@@ -70,7 +70,7 @@ app = fastapi_runner.entrypoint.create_app(
 
 Both entry points install the same shared application behavior:
 
-- CORS middleware configured through the `CORS_` environment prefix;
+- CORS middleware configured through the `FASTAPI_RUNNER_CORS_` environment prefix;
 - problem-detail responses for HTTP and validation errors;
 - an application state hook for customizing problem-detail bodies;
 - access logging, with the documentation routes excluded by default; and
@@ -147,8 +147,8 @@ I moved the date out of the log message so that it fits into the general log for
 You can customize the message format to fit your needs by adjusting the formatter
 attached to the `api-runner.access` logger.
 
-**WARNING**: The only way to currently disable access logging is to set the level
-of the `api-runner.access` logger to `CRITICAL`.
+The `FASTAPI_RUNNER_ACCESS_LOG` environment variable can be set to `no` to disable
+access logging. There is currently no way to change the access logger name.
 
 ## Development
 

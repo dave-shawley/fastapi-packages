@@ -64,7 +64,7 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
             mock.patch.dict('os.environ', {}, clear=True),
             self.assertRaisesRegex(
                 errors.ApplicationConfigurationError,
-                'APPLICATION environment variable is required',
+                'Missing required.* FASTAPI_RUNNER_APPLICATION.*',
             ),
         ):
             entrypoint.app_factory()
@@ -73,7 +73,9 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
         self,
     ) -> None:
         with (
-            mock.patch.dict('os.environ', {'APPLICATION': 'github-runner'}),
+            mock.patch.dict(
+                'os.environ', {'FASTAPI_RUNNER_APPLICATION': 'github-runner'}
+            ),
             mock.patch.object(
                 entrypoint.metadata,
                 'distribution',
@@ -93,7 +95,9 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
         entry_points = FakeEntryPoints()
 
         with (
-            mock.patch.dict('os.environ', {'APPLICATION': 'github-runner'}),
+            mock.patch.dict(
+                'os.environ', {'FASTAPI_RUNNER_APPLICATION': 'github-runner'}
+            ),
             mock.patch.object(
                 entrypoint.metadata,
                 'distribution',
@@ -131,7 +135,9 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
                 'distribution',
                 return_value=FakeDistribution(entry_points),
             ),
-            mock.patch.dict('os.environ', {'APPLICATION': 'github-runner'}),
+            mock.patch.dict(
+                'os.environ', {'FASTAPI_RUNNER_APPLICATION': 'github-runner'}
+            ),
         ):
             app = entrypoint.app_factory()
 
@@ -219,7 +225,9 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
                 'distribution',
                 return_value=FakeDistribution(entry_points),
             ),
-            mock.patch.dict('os.environ', {'APPLICATION': 'github-runner'}),
+            mock.patch.dict(
+                'os.environ', {'FASTAPI_RUNNER_APPLICATION': 'github-runner'}
+            ),
         ):
             app = entrypoint.app_factory()
 
@@ -249,7 +257,9 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
                 'distribution',
                 return_value=FakeDistribution(entry_points),
             ),
-            mock.patch.dict('os.environ', {'APPLICATION': 'github-runner'}),
+            mock.patch.dict(
+                'os.environ', {'FASTAPI_RUNNER_APPLICATION': 'github-runner'}
+            ),
         ):
             app = entrypoint.app_factory()
 
@@ -258,3 +268,79 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
             self.assertEqual(state['lifespan_data'], {})
 
         self.assertEqual(configured_apps, [app])
+
+    def test_app_factory_with_cors_disabled(self) -> None:
+        def configure(_app: fastapi.FastAPI) -> None:
+            pass
+
+        entry_points = FakeEntryPoints(configure=FakeEntryPoint(configure))
+
+        with (
+            mock.patch.dict(
+                'os.environ',
+                {
+                    'FASTAPI_RUNNER_APPLICATION': 'github-runner',
+                    'FASTAPI_RUNNER_CORS_ENABLED': 'no',
+                },
+            ),
+            mock.patch.object(
+                entrypoint.metadata,
+                'distribution',
+                return_value=FakeDistribution(entry_points),
+            ),
+        ):
+            app = entrypoint.app_factory()
+
+        configured_middleware = {m.cls for m in app.user_middleware}
+        self.assertNotIn(cors.CORSMiddleware, configured_middleware)
+
+    def test_app_factory_with_access_log_disabled(self) -> None:
+        def configure(_app: fastapi.FastAPI) -> None:
+            pass
+
+        entry_points = FakeEntryPoints(configure=FakeEntryPoint(configure))
+
+        with (
+            mock.patch.dict(
+                'os.environ',
+                {
+                    'FASTAPI_RUNNER_APPLICATION': 'github-runner',
+                    'FASTAPI_RUNNER_ACCESS_LOG': 'no',
+                },
+            ),
+            mock.patch.object(
+                entrypoint.metadata,
+                'distribution',
+                return_value=FakeDistribution(entry_points),
+            ),
+        ):
+            app = entrypoint.app_factory()
+
+        configured_middleware = {m.cls for m in app.user_middleware}
+        self.assertNotIn(middleware.AccessLogMiddleware, configured_middleware)
+
+    def test_invalid_access_log_configuration(self) -> None:
+        def configure(_app: fastapi.FastAPI) -> None:
+            pass
+
+        entry_points = FakeEntryPoints(configure=FakeEntryPoint(configure))
+
+        with (
+            mock.patch.dict(
+                'os.environ',
+                {
+                    'FASTAPI_RUNNER_APPLICATION': 'github-runner',
+                    'FASTAPI_RUNNER_ACCESS_LOG': 'not a flag',
+                },
+            ),
+            mock.patch.object(
+                entrypoint.metadata,
+                'distribution',
+                return_value=FakeDistribution(entry_points),
+            ),
+            self.assertRaisesRegex(
+                errors.ApplicationConfigurationError,
+                'Invalid environment variables:.*FASTAPI_RUNNER_ACCESS_LOG.*',
+            ),
+        ):
+            entrypoint.app_factory()
