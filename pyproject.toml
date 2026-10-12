@@ -9,6 +9,13 @@ authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
 [project.urls]
 Repository = "https://github.com/dave-shawley/fastapi-packages"
 
+[project.optional-dependencies]
+otel = [
+  "opentelemetry-distro>=0.66b1",
+  "opentelemetry-exporter-otlp>=1.45.1",
+  "opentelemetry-exporter-otlp-proto-http>=1.45.1",
+]
+
 [dependency-groups]
 dev = [
   "coverage~=7.15",
@@ -114,7 +121,9 @@ split-on-trailing-comma = false
 # avoid having to specify matching versions everywhere.
 constraint-dependencies = [
   "anyio~=4.14",
-  "fastapi~=0.139.1",
+  "fastapi~=0.143.0",
+  "opentelemetry-api~=1.45.1",
+  "opentelemetry-sdk~=1.45.1",
   "pydantic~=2.13",
   "pydantic-settings~=2.14",
   "starlette~=1.3",

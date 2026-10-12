@@ -95,7 +95,7 @@ def create_app(
         for hook in lifespan_generator():
             span.add_lifespan(hook)
 
-    app = fastapi.FastAPI(lifespan=span)
+    app = fastapi.FastAPI(lifespan=span, telemetry={'auto_configure': False})
 
     cors_settings = CORSSettings()
     if cors_settings.enabled:

@@ -13,7 +13,7 @@ ENV \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 COPY /pyproject.toml /uv.lock /README.md /source/
 COPY /libraries/ /source/libraries/
-RUN uv sync --directory /source --no-dev --no-default-groups --no-editable --frozen
+RUN uv sync --directory /source --no-dev --no-default-groups --no-editable --extra otel --frozen
 
 #
 # `package-builder` stage extends the `builder` stage by installing a specific application
@@ -33,6 +33,11 @@ ARG APPLICATION
 EXPOSE 8000
 ENV \
     FASTAPI_RUNNER_APPLICATION="$APPLICATION" \
+	OTEL_LOGS_EXPORTER=none \
+	OTEL_METRICS_EXPORTER=none \
+	OTEL_PROPAGATORS=tracecontext,baggage \
+	OTEL_RESOURCE_ATTRIBUTES="service.name=$APPLICATION" \
+	OTEL_TRACES_EXPORTER=none \
     PATH="/app/bin:$PATH" \
     UVICORN_ACCESS_LOG="no" \
     UVICORN_HOST="0.0.0.0" \
@@ -46,4 +51,4 @@ ENV \
 VOLUME /config
 COPY --from=package-builder /app /app
 COPY ./packaging/log-config.json /config/log-config.json
-CMD ["/app/bin/uvicorn", "--factory", "fastapi_runner.entrypoint:app_factory"]
+CMD [ "/app/bin/opentelemetry-instrument", "/app/bin/uvicorn", "--factory", "fastapi_runner.entrypoint:app_factory" ]

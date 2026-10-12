@@ -113,18 +113,32 @@ handlers also allow an application to update the generated body through the
 Use `fastapi_runner.middleware.disable_access_log` on an endpoint when its
 requests should not produce an access-log record.
 
-## Customization
+## Deployment
+
+The `dave-shawley/fastapi-builder` image is a suitable base image for deploying
+applications built using `fastapi-runner`. The _packaging/Dockerfile_ contains
+a multi-stage build that uses `fastapi-runner` to build the application and then
+copies the resulting artifacts into a minimal image. You should use a similar
+approach when deploying your application.
+
+The included Dockerfile also includes support for running the application with
+opentelemetry enabled though you will need to configure the exporter. I use
+opentelemetry-instrument to automatically instrument the application process.
+You simply need to include additional instrumentation libraries like
+[opentelemetry-instrumentation-psycopg] and the instrument command will pick it
+up and instrument the process.
+
+[opentelemetry-instrumentation-psycopg]: https://pypi.org/project/opentelemetry-instrumentation-psycopg/
 
 ### Logging
 
-The default logging configuration is based on the
-[Common Logging Format](https://en.wikipedia.org/wiki/Common_Log_Format). The
-`fastapi_runner.middleware.AccessLogMiddleware` uses the logger named
-`api-runner.access` to log access records. I decided to push the field
-configuration into the logging configuration (see packaging/log-config.json)
-though I may change that in the future depending on ergonomics. The current
-implemention creates a log record with the following custom fields that are
-accessed using `%(name)s` in the format record.
+The default logging configuration is based on the [Common Logging Format](https://en.wikipedia.org/wiki/Common_Log_Format).
+The `fastapi_runner.middleware.AccessLogMiddleware` uses the logger named
+`api-runner.access` to log access records. I decided to push the field configuration
+into the logging configuration (see packaging/log-config.json) though I may change
+that in the future depending on ergonomics. The current implemention creates a log
+record with he following custom fields that are accessed using `%(name)s` in the
+format record.
 
 | Field              | Description                                       |
 | ------------------ | ------------------------------------------------- |
