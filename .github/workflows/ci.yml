@@ -13,7 +13,7 @@ jobs:
       - uses: astral-sh/setup-uv@v10.3.0
       - uses: extractions/setup-just@v4
         with:
-          just-version: "1.46"
+          just-version: "1.58"
       - uses: dprint/check@v2.5
       - run: |
           uv sync --all-extras --all-groups --all-packages --frozen
