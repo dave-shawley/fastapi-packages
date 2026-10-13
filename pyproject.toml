@@ -50,7 +50,7 @@ use-ignore-files = true  # just in case someone changes the default
 
 [tool.ruff]
 line-length = 79
-target-version = "py314"
+target-version = "py312"
 
 [tool.ruff.format]
 quote-style = "single"

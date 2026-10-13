@@ -1,4 +1,3 @@
-import annotationlib
 import contextlib
 import http
 import inspect
@@ -78,7 +77,7 @@ class Lifespan(dict[LifespanHook, object | None]):
 def _get_lifespan(request: fastapi.Request) -> Lifespan:
     try:
         lifespan = request.state.lifespan_data
-    except AttributeError, ValueError:
+    except (AttributeError, ValueError):
         logger = logging.getLogger(__package__).getChild('_get_lifespan')
         logger.exception('Lifespan is not available in %r', set(request.state))
         raise fastapi.HTTPException(
@@ -113,7 +112,7 @@ def _invoke_hook[T](
     params = tuple(
         inspect.signature(
             hook,
-            annotation_format=annotationlib.Format.STRING,
+            eval_str=False,
         ).parameters.values()
     )
     if not params:

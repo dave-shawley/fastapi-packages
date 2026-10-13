@@ -199,7 +199,7 @@ class LifespanTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_lifespan_map_dependency(self) -> None:
         @contextlib.asynccontextmanager
-        async def hook() -> t.AsyncGenerator[uuid.UUID]:
+        async def hook() -> abc.AsyncGenerator[uuid.UUID]:
             yield uuid.uuid4()
 
         span = lifespan.Lifespan()
@@ -218,7 +218,7 @@ class LifespanTests(unittest.IsolatedAsyncioTestCase):
 
     async def test_unstarted_lifespan(self) -> None:
         @contextlib.asynccontextmanager
-        async def hook() -> t.AsyncGenerator[uuid.UUID]:
+        async def hook() -> abc.AsyncGenerator[uuid.UUID]:
             yield uuid.uuid4()
 
         app = fastapi.FastAPI()
@@ -238,7 +238,7 @@ class LifespanTests(unittest.IsolatedAsyncioTestCase):
         @contextlib.asynccontextmanager
         async def lifespan_hook(
             _app: fastapi.FastAPI,
-        ) -> t.AsyncGenerator[dict[str, object]]:
+        ) -> abc.AsyncGenerator[dict[str, object]]:
             yield {'lifespan_data': object()}
 
         app = fastapi.FastAPI(lifespan=lifespan_hook)
@@ -250,6 +250,8 @@ class LifespanTests(unittest.IsolatedAsyncioTestCase):
         with fastapi.testclient.TestClient(app) as client:
             response = client.get('/')
             self.assertEqual(500, response.status_code)
-            self.assertStartsWith(
-                response.json()['detail'], 'Unexpected lifespan type: '
+            self.assertTrue(
+                response.json()['detail'].startswith(
+                    'Unexpected lifespan type: '
+                )
             )
