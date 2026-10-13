@@ -24,7 +24,7 @@ dev = [
   "pyrefly~=1.2",
   "pytest~=9.1",
   "ruff>=0.16.10",
-  "tombi~=1.4",
+  "tombi~=1.7",
 ]
 
 [build-system]
