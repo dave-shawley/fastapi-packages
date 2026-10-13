@@ -14,12 +14,12 @@ jobs:
     env:
       UV_FROZEN: "1"
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: astral-sh/setup-uv@v10.3.0
-      - uses: extractions/setup-just@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 #v10.3.0
+      - uses: extractions/setup-just@53165ef7e734c5c07cb06b3c8e7b647c5aa16db3 #v4
         with:
           just-version: "1.58"
-      - uses: dprint/check@v2.5
+      - uses: dprint/check@7dc032d8874778fc024f6f9b4a7e6d896782c330 #v2.5
       - run: |
           uv sync --all-extras --all-groups --all-packages --frozen
           uv run ruff check
@@ -34,8 +34,8 @@ jobs:
     env:
       UV_FROZEN: "1"
     steps:
-      - uses: actions/checkout@v7.0.1
-      - uses: astral-sh/setup-uv@v10.3.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 #v10.3.0
         with:
           python-version: ${{ matrix.python-version }}
       - run: |
