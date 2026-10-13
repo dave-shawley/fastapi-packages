@@ -6,7 +6,21 @@ readme = "README.md"
 requires-python = ">=3.12"
 license = "BSD-3-Clause"
 authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
-dependencies = ["fastapi", "pydantic", "pydantic-settings"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Framework :: FastAPI",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
+  "Topic :: Software Development :: Libraries",
+  "Typing :: Typed",
+]
+dependencies = ["fastapi~=0.143.0", "pydantic~=2.13", "pydantic-settings~=2.14"]
 
 [build-system]
 requires = ["hatchling~=1.32"]

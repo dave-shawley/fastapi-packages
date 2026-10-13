@@ -392,9 +392,9 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi" },
-    { name = "pydantic" },
-    { name = "pydantic-settings" },
+    { name = "fastapi", specifier = "~=0.143.0" },
+    { name = "pydantic", specifier = "~=2.13" },
+    { name = "pydantic-settings", specifier = "~=2.14" },
 ]
 
 [[package]]
