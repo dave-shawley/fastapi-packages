@@ -8,6 +8,8 @@ jobs:
 
   analyze:
     runs-on: ubuntu-latest
+    env:
+      UV_FROZEN: "1"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: astral-sh/setup-uv@v10.3.0
@@ -26,12 +28,15 @@ jobs:
       fail-fast: false
       matrix:
         python-version: [ "3.12", "3.13", "3.14", "3.15" ]
+    env:
+      UV_FROZEN: "1"
     steps:
       - uses: actions/checkout@v7.0.1
       - uses: astral-sh/setup-uv@v10.3.0
         with:
           python-version: ${{ matrix.python-version }}
       - run: |
+          uv sync --all-extras --all-groups --all-packages --frozen
           uv run coverage run -m pytest
           uv run coverage report
           uv run coverage xml 
