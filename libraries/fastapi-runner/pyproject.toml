@@ -9,5 +9,5 @@ authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
 dependencies = ["fastapi", "pydantic", "pydantic-settings"]
 
 [build-system]
-requires = ["hatchling~=1.26"]
+requires = ["hatchling~=1.32"]
 build-backend = "hatchling.build"
