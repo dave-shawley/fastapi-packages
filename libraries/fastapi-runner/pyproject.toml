@@ -20,7 +20,7 @@ classifiers = [
   "Topic :: Software Development :: Libraries",
   "Typing :: Typed",
 ]
-dependencies = ["fastapi~=0.143.0", "pydantic~=2.13", "pydantic-settings~=2.14"]
+dependencies = ["fastapi~=0.143.3", "pydantic~=2.13", "pydantic-settings~=2.14"]
 
 [build-system]
 requires = ["hatchling~=1.32"]
