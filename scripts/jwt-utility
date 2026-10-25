@@ -1,0 +1,76 @@
+#!/usr/bin/env -S uv run --script
+# vim: set ft=python:
+# /// script
+# dependencies = ["pyjwt[crypto]~=2.15","typer~=0.27.3"]
+# ///
+
+import json
+import pathlib
+import time
+import typing as t
+
+import jwt
+import rich
+import typer
+
+
+app = typer.Typer()
+
+
+@app.command()
+def create(
+    *,
+    secret_key: pathlib.Path | None = None,
+    audience: str | None = None,
+    expires_in: float = 300,
+    issuer: str | None = None,
+    scope: list[str] | None = None,
+    subject: str | None = None,
+) -> None:
+    """Create a new JWT"""
+    if secret_key is None:
+        top_dir = pathlib.Path(__file__).parent.parent
+        secrets_dir = top_dir / 'runtime' / 'secrets'
+        secret_key = secrets_dir / 'auth_key'
+
+    payload = {
+        'aud': audience,
+        'iat': time.time(),
+        'iss': issuer,
+        'sub': subject,
+        'scope': ' '.join(scope) if scope is not None else None,
+    }
+    payload['exp'] = payload['iat'] + expires_in
+    payload = {k: v for k, v in payload.items() if v is not None}
+    encoded = jwt.encode(payload, secret_key.read_text(), algorithm='ES256')
+    print(encoded)
+
+
+@app.command()
+def decode(
+    data: typer.FileText,
+    *,
+    public_key: pathlib.Path | None = None,
+    require: list[str] | None = None,
+) -> None:
+    """Decode a JWT"""
+    if public_key is None:
+        top_dir = pathlib.Path(__file__).parent.parent
+        secrets_dir = top_dir / 'runtime' / 'secrets'
+        public_key = secrets_dir / 'auth_key.pub'
+
+    options = {}
+    if require:
+        if len(require) == 1 and ',' in require[0]:
+            options['require'] = require[0].split(',')
+        else:
+            options['require'] = require
+    encoded = data.read().strip()
+    token = jwt.decode(
+        encoded, public_key.read_text(), algorithms=['ES256'], options=options
+    )
+    rich.print(token)
+
+
+if __name__ == '__main__':
+    app()

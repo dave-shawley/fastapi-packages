@@ -1,5 +1,8 @@
 {
-  "excludes": ["**/uv.lock"], // tombi and uv don't agree on uv.lock format
+  "excludes": [
+    "**/uv.lock"
+  ],
+  // tombi and uv don't agree on uv.lock format
   "exec": {
     "cwd": "${configDir}",
     "commands": [
@@ -7,20 +10,27 @@
       // incompatible with WASM so we need to exec it.
       {
         "command": "uv run tombi format --quiet --stdin-filename {{file_path}} -",
-        "exts": ["toml"]
+        "exts": [
+          "toml"
+        ]
       },
-      // just doesn't expose programmatic formatting in a convenient 
+      // just doesn't expose programmatic formatting in a convenient
       // way so I'm going to exec for the time being
       {
         "command": "just --fmt --unstable --justfile-name {{file_path}} --justfile -",
-        "exts": ["just"],
-        "fileNames": ["justfile"]
+        "exts": [
+          "just"
+        ],
+        "fileNames": [
+          "justfile"
+        ]
       }
     ]
   },
   "markdown": {
     "lineWidth": 120,
-    "textWrap": "maintain" // consider using "always"
+    "textWrap": "maintain"
+    // consider using "always"
   },
   "ruff": {
     "lineLength": 79,
@@ -30,5 +40,8 @@
     "https://plugins.dprint.dev/ruff-0.8.1.wasm",
     "https://plugins.dprint.dev/markdown-0.22.1.wasm",
     "https://plugins.dprint.dev/exec-0.7.3.json@a7898d5f1897e77bff474cec3d948c3ec3a7f455e32de2cc60c8adb9a5dd24aa"
-  ]
+  ],
+  "shebangs": {
+    "#!/usr/bin/env -S uv run --script": "py"
+  }
 }
