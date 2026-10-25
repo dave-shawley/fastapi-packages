@@ -135,13 +135,14 @@ package = false  # tell uv that the root IS NOT a package
 required-version = " >=0.10.0"
 
 [tool.uv.workspace]
-members = ["libraries/fastapi-runner"]
+members = ["apps/example-app", "libraries/fastapi-runner"]
 
 # sources is inherited by workspace members so they will
 # ALWAYS use the workspace sources regardless of whether
 # individual packages are in pypi or not. This works in
 # conjunction with tool.uv.workspace.members.
 [tool.uv.sources]
+example-app = { workspace = true }
 fastapi-runner = { workspace = true }
 
 # since I occasiontally work inside a sandbox

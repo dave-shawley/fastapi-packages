@@ -4,9 +4,10 @@ import logging
 import typing as t
 from collections import abc
 
-import fastapi
+import fastapi.security
 import pydantic
 
+import example.auth
 import fastapi_runner.lifespan
 
 Status = t.Literal['running', 'starting', 'stopping']
@@ -38,9 +39,16 @@ async def state_lifespan() -> abc.AsyncGenerator[State]:
         state.status = 'stopping'
 
 
+def authenticated_action(*, claims: example.auth.AuthenticatedClaims) -> None:
+    logger = logging.getLogger('application')
+    logger.info('authorized for %r', claims.scopes)
+    logger.info('authorized as %r', claims.principal)
+
+
 def lifespans() -> abc.Generator[fastapi_runner.lifespan.LifespanHook]:
-    yield state_lifespan
+    yield from [state_lifespan, example.auth.auth_lifespan]
 
 
 def configure(app: fastapi.FastAPI) -> None:
+    app.add_api_route('/authenticated', authenticated_action)
     app.add_api_route('/status', status)
