@@ -1,4 +1,5 @@
 import contextlib
+import logging
 import typing as t
 from collections import abc
 from importlib import metadata
@@ -8,7 +9,7 @@ import fastapi.middleware.cors
 import pydantic
 import pydantic_settings
 
-from fastapi_runner import error_handling, errors, lifespan, middleware, types
+from fastapi_runner import error_handling, errors, lifespan, middleware, state
 
 
 class ApplicationSettings(pydantic_settings.BaseSettings):
@@ -59,13 +60,17 @@ def app_factory() -> fastapi.FastAPI:
             'installed Python distribution'
         ) from None
 
-    configure, lifespan_generator = _load_hooks(distribution)
-
-    return create_app(
-        configure=configure,
-        lifespan_generator=lifespan_generator,
-        enable_access_log=settings.access_log,
-    )
+    logger = logging.getLogger('fastapi_runner.app_factory')
+    try:
+        configure, lifespan_generator = _load_hooks(distribution)
+        return create_app(
+            configure=configure,
+            lifespan_generator=lifespan_generator,
+            enable_access_log=settings.access_log,
+        )
+    except Exception:
+        logger.exception('configure() raised an exception')
+        raise
 
 
 def create_app(
@@ -110,9 +115,8 @@ def create_app(
             max_age=cors_settings.max_age,
         )
 
-    # Overrideable to customize error document creation.
-    state = t.cast('types.AppStateShape', app.state)
-    state.fastapi_runner_error_updater = None
+    # Install overrideable defaults
+    state.initialize_application_state(app.state)
 
     # Add custom error handlers for specific exception
     # types BEFORE invoking the application level configure
@@ -133,12 +137,14 @@ def create_app(
         error_handling.problem_details_translator,
     )
 
-    # The AccessLogMiddleware should ALWAYS be added last
+    # The AccessLogMiddleware and RequestStateMiddleware are
+    # REQUIRED to be last so that they execute FIRST
     if enable_access_log:
         app.add_middleware(
             middleware.AccessLogMiddleware,
             ignored_paths=('/docs', '/openapi.json', '/redoc'),
         )
+    app.add_middleware(middleware.RequestStateMiddleware)
 
     return app
 

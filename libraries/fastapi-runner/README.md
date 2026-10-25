@@ -107,8 +107,8 @@ def status(*, state: t.Annotated[State, fastapi.Depends(get_state)]) -> State:
 
 The application may raise `fastapi_runner.errors.ProblemDetailError` when it
 needs to provide a complete problem-detail document. The default error
-handlers also allow an application to update the generated body through the
-`fastapi_runner_error_updater` callback on `app.state`.
+handlers also allow an application to update the generated body through
+`fastapi_runner.error_handling.set_error_updater`.
 
 Use `fastapi_runner.middleware.disable_access_log` on an endpoint when its
 requests should not produce an access-log record.

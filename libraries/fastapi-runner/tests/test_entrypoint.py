@@ -155,7 +155,11 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
                 middleware_config.cls
                 for middleware_config in app.user_middleware
             },
-            {cors.CORSMiddleware, middleware.AccessLogMiddleware},
+            {
+                cors.CORSMiddleware,
+                middleware.AccessLogMiddleware,
+                middleware.RequestStateMiddleware,
+            },
         )
         for middleware_config in app.user_middleware:
             match middleware_config.cls:
@@ -189,6 +193,8 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
                         middleware_config.kwargs['ignored_paths'],
                         ('/docs', '/openapi.json', '/redoc'),
                     )
+                case middleware.RequestStateMiddleware:
+                    self.assertDictEqual(middleware_config.kwargs, {})
                 case _:
                     self.fail(
                         f'Unexpected middleware class: {middleware_config.cls}'

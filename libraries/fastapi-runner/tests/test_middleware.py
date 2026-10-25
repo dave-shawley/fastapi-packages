@@ -3,11 +3,13 @@ import logging
 import typing as t
 import unittest
 
-import fastapi
+import fastapi.security
+import starlette.middleware.authentication
+import starlette.requests
 import starlette.types
 from fastapi.testclient import TestClient
 
-from fastapi_runner import middleware
+from fastapi_runner import middleware, state
 
 
 class AccessLogRecord(logging.LogRecord):
@@ -19,6 +21,7 @@ class AccessLogRecord(logging.LogRecord):
     path: str
     http_version: str
     duration: str
+    principal: str
 
 
 class AccessLogMiddlewareTests(unittest.TestCase):
@@ -195,8 +198,55 @@ class AccessLogMiddlewareTests(unittest.TestCase):
             )
         )
 
+    def test_access_log_disabled_obeys_request_scope(self) -> None:
+        scope = {'type': 'http'}
+        self.assertFalse(middleware._is_access_log_disabled(scope))
+        scope = state.initialize_request_state(scope)
+        request_state = state.get_request_state(scope)
+        request_state['disable_access_log'] = True
+        self.assertTrue(middleware._is_access_log_disabled(scope))
+
     def test_access_log_disabled_returns_false_without_endpoint(self) -> None:
         self.assertFalse(middleware._is_access_log_disabled({'type': 'http'}))
+
+    def test_logging_of_principal(self) -> None:
+        app = fastapi.FastAPI()
+        app.add_middleware(middleware.AccessLogMiddleware)
+        app.add_middleware(middleware.RequestStateMiddleware)
+
+        bearer_scheme = fastapi.security.OAuth2AuthorizationCodeBearer(
+            authorizationUrl='https://example.com/auth',
+            tokenUrl='https://example.com/token',
+        )
+
+        @app.get('/authorized')
+        async def authorized_request(
+            *,
+            request: fastapi.Request,
+            token: t.Annotated[str, fastapi.Depends(bearer_scheme)],
+        ) -> None:
+            state.set_principal_id(token, request=request)
+
+        with TestClient(app) as client:
+            with self.assertLogs('api-runner.access') as captured:
+                response = client.get('/docs')
+                self.assertEqual(response.status_code, 200)
+            captured_records = t.cast(
+                'list[AccessLogRecord]', captured.records
+            )
+            self.assertEqual(len(captured.records), 1)
+            self.assertEqual(captured_records[0].principal, '-')
+
+            with self.assertLogs('api-runner.access') as captured:
+                response = client.get(
+                    '/authorized', headers={'authorization': 'Bearer username'}
+                )
+                self.assertEqual(response.status_code, 200)
+            captured_records = t.cast(
+                'list[AccessLogRecord]', captured.records
+            )
+            self.assertEqual(len(captured.records), 1)
+            self.assertEqual(captured_records[0].principal, 'username')
 
 
 class AccessLogMiddlewareAsyncTests(unittest.IsolatedAsyncioTestCase):

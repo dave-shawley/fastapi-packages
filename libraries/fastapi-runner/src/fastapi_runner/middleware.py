@@ -7,6 +7,8 @@ from collections import abc
 
 import starlette.types
 
+from fastapi_runner import state
+
 _DISABLE_ACCESS_LOG_ATTR = '_fastapi_runner_disable_access_log'
 
 
@@ -26,6 +28,7 @@ class _LogData(t.TypedDict):
     method: str
     path: str
     http_version: str
+    principal: str
     duration: t.NotRequired[str]
 
 
@@ -44,6 +47,7 @@ class _AccessLogState:
             'method': scope['method'],
             'path': scope['path'],
             'http_version': scope['http_version'],
+            'principal': '-',
         }
         if client := scope.get('client', None):
             host: str = client[0]
@@ -69,11 +73,31 @@ class _AccessLogState:
         self.data['bytes_sent'] += value
 
     def finish(self, scope: starlette.types.Scope) -> None:
+        with contextlib.suppress(state.RequestStateNotInitializedError):
+            request_state = state.require_request_state(scope)
+            if principal_id := request_state.get('principal_id', None):
+                self.data['principal'] = principal_id
+
         time_ms = (time.monotonic_ns() - self.start_time) * 1e-6
         self.data['duration'] = f'{time_ms:.3f} ms'
         if not self._resolved_access_log_disabled:
             self.access_log_disabled = _is_access_log_disabled(scope)
             self._resolved_access_log_disabled = True
+
+
+class RequestStateMiddleware:
+    """Installs the library's per-request ASGI state."""
+
+    def __init__(self, app: starlette.types.ASGIApp) -> None:
+        self.app = app
+
+    async def __call__(
+        self,
+        scope: starlette.types.Scope,
+        receive: starlette.types.Receive,
+        send: starlette.types.Send,
+    ) -> None:
+        await self.app(state.initialize_request_state(scope), receive, send)
 
 
 class AccessLogMiddleware:
@@ -109,6 +133,10 @@ class AccessLogMiddleware:
 
 
 def _is_access_log_disabled(scope: starlette.types.Scope) -> bool:
+    request_state = state.get_request_state(scope)
+    if request_state.get('disable_access_log', False):
+        return True
+
     endpoint = scope.get('endpoint', None)
     if endpoint is None:
         return False
@@ -150,4 +178,15 @@ async def _message_logger(
                     t.assert_never(state.status_code)
 
             logger = logging.getLogger('api-runner.access')
-            logger.log(log_level, '', extra=state.data)
+            logger.log(
+                log_level,
+                '%s %s "%s %s HTTP/%s" %s %s',
+                state.data['client'],
+                state.data['principal'],
+                state.data['method'],
+                state.data['path'],
+                state.data['http_version'],
+                state.data['status_code'],
+                state.data['bytes_sent'],
+                extra=state.data,
+            )

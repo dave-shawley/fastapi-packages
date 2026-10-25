@@ -44,6 +44,24 @@ class ErrorHandlingTests(unittest.TestCase):
         self.assertEqual(404, body['status'])
         self.assertEqual('about:blank', body['type'])
 
+    def test_header_preservation(self) -> None:
+        source = fastapi.exceptions.HTTPException(
+            status_code=404, headers={'custom-header': 'value'}
+        )
+        response = error_handling.problem_details_translator(
+            unittest.mock.Mock(spec=fastapi.Request), source
+        )
+        self.assertEqual(404, response.status_code)
+        self.assertEqual(
+            'application/problem+json', response.headers['content-type']
+        )
+        self.assertEqual('value', response.headers['custom-header'])
+
+        body = json.loads(bytes(response.body).decode('utf-8'))
+        self.assertEqual('Not Found', body['title'])
+        self.assertEqual(404, body['status'])
+        self.assertEqual('about:blank', body['type'])
+
     def test_problem_details_passthru(self) -> None:
         source = errors.ProblemDetailError(
             status_code=404,
@@ -106,7 +124,7 @@ class ErrorHandlingTests(unittest.TestCase):
         ) -> None:
             return None
 
-        self.app.state.fastapi_runner_error_updater = updater
+        error_handling.set_error_updater(self.app, updater)
         with fastapi.testclient.TestClient(self.app) as client:
             response = client.get('/')
             self.assertEqual(400, response.status_code)

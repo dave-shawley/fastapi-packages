@@ -6,7 +6,7 @@ from collections import abc
 
 import fastapi.exceptions
 
-from fastapi_runner import errors, types
+from fastapi_runner import errors, state, types
 
 
 class ValidationErrorShape(t.TypedDict, total=False):
@@ -15,6 +15,18 @@ class ValidationErrorShape(t.TypedDict, total=False):
     type: t.Required[str]
     loc: t.Required[abc.Sequence[str]]
     msg: t.Required[str]
+
+
+def set_error_updater(
+    app: fastapi.FastAPI, error_updater: types.ErrorUpdater
+) -> None:
+    """Install an application-level custom error updater.
+
+    This hook is called to translate [ProblemDetailBody][] error
+    bodies before they are returned to the client.
+    """
+    app_state = state.require_application_state(app.state)
+    app_state.error_updater = error_updater
 
 
 def _ensure_declared_exception_type[T: Exception, R](
@@ -72,9 +84,9 @@ def problem_details_translator(
 
     The response shape matches `types.ProblemDetailBody` with the
     default status and title coming from `exc` properties.
-    Applications should define the `fastapi_runner_error_updater`
-    attribute on the state as a callable that updates the error
-    body to match application expectations.
+    Applications can install an `error_updater` callback with
+    `set_error_updater` to update the error body to match application
+    expectations.
 
     """
     error_body: types.ProblemDetailBody
@@ -88,14 +100,15 @@ def problem_details_translator(
             }
         )
 
-    app_state = t.cast('types.AppStateShape', request.app.state)
-    if app_state.fastapi_runner_error_updater is not None:
-        app_state.fastapi_runner_error_updater(request, exc, error_body)
+    app_state = state.get_application_state(request.app.state)
+    if app_state.error_updater is not None:
+        app_state.error_updater(request, exc, error_body)
 
     return fastapi.Response(
         media_type='application/problem+json',
         status_code=exc.status_code,
         content=error_body.model_dump_json(),
+        headers=exc.headers,
     )
 
 
@@ -130,9 +143,9 @@ def validation_error_handler(
         errors[err['type']].append('.'.join(err['loc']))
     error_body.errors.update(errors)
 
-    app_state = t.cast('types.AppStateShape', request.app.state)
-    if app_state.fastapi_runner_error_updater is not None:
-        app_state.fastapi_runner_error_updater(request, exc, error_body)
+    app_state = state.get_application_state(request.app.state)
+    if app_state.error_updater is not None:
+        app_state.error_updater(request, exc, error_body)
 
     return fastapi.Response(
         media_type='application/problem+json',
