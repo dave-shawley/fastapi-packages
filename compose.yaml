@@ -1,0 +1,17 @@
+services:
+  example-app:
+    image: dave-shawley/fastapi-example-app:local
+    build:
+      dockerfile: ./packaging/Dockerfile
+      context: .
+      target: webapp
+      args:
+        APPLICATION: example-app
+    ports:
+      - 8000
+    secrets:
+      - auth_key
+
+secrets:
+  auth_key:
+    file: ./runtime/secrets/auth_key

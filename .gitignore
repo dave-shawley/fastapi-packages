@@ -1,6 +1,7 @@
 .*
 /build
 /dist
+/runtime
 !/.github
 !/.gitignore
 !/.pre-commit-config.yaml
