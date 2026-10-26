@@ -1,3 +1,4 @@
+export UV_FROZEN := "1"
 runtime_dir := justfile_directory() / 'runtime'
 secrets_dir := runtime_dir / 'secrets'
 
@@ -7,7 +8,7 @@ secrets_dir := runtime_dir / 'secrets'
 [doc("Set up a newly cloned repo")]
 @setup: _env _secrets
     command -v dprint>/dev/null || ( echo 'Install dprint from https://dprint.dev'; exit 1 )
-    uv sync --quiet --all-extras --all-groups --all-packages --frozen
+    uv sync --quiet --all-extras --all-groups --all-packages
     uv run pre-commit install --install-hooks --overwrite >/dev/null
 
 [doc("Run static analysis tools")]
@@ -28,7 +29,7 @@ test *ARGS: setup
     @[ -z '{{ ARGS }}' ] && uv run coverage report
 
 [doc("Build distributions")]
-build: setup
+build: docs setup
     uv build --package=fastapi-runner --sdist --wheel --clear
     docker build -f packaging/Dockerfile --target builder -t dave-shawley/fastapi-builder:local .
     docker build -f packaging/Dockerfile --target webapp --build-arg APPLICATION=example-app -t dave-shawley/fastapi-example-app:local .
@@ -44,6 +45,10 @@ compose-down:
 [doc("Remove generated files")]
 clean: compose-down
     - rm -fr {{ runtime_dir }}
+
+[doc("Build documentation")]
+docs: setup
+    uv run --package=fastapi-runner --directory=libraries/fastapi-runner zensical build --clean
 
 _env:
     #!/usr/bin/env sh

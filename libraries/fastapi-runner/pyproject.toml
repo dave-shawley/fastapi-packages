@@ -26,6 +26,14 @@ dependencies = [
   "pydantic-settings~=2.14",
 ]
 
+[dependency-groups]
+dev = [
+  "mkdocs-material>=9.8.0",
+  "mkdocstrings[python]>=1.0.8",
+  "pymdown-ietflinks>=0.0.0",
+  "zensical>=0.0.72",
+]
+
 [build-system]
 requires = ["hatchling~=1.32"]
 build-backend = "hatchling.build"
