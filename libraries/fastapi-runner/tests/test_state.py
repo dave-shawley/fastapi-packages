@@ -65,7 +65,7 @@ class SetPrincipalIdTests(unittest.TestCase):
 class StateManagementTests(unittest.TestCase):
     def test_application_state(self) -> None:
         app_state = starlette.datastructures.State()
-        self.assertNotHasAttr(app_state, state.APPLICATION_STATE_ATTR)
+        self.assertFalse(hasattr(app_state, state.APPLICATION_STATE_ATTR))
 
         # get_application_state does not raise and returns a
         # unique empty state object when uninitialized
@@ -81,7 +81,7 @@ class StateManagementTests(unittest.TestCase):
 
         # initialize_application_state stores a new state object
         state.initialize_application_state(app_state)
-        self.assertHasAttr(app_state, state.APPLICATION_STATE_ATTR)
+        self.assertTrue(hasattr(app_state, state.APPLICATION_STATE_ATTR))
         init_state = getattr(app_state, state.APPLICATION_STATE_ATTR)
         self.assertIs(state.get_application_state(app_state), init_state)
 
