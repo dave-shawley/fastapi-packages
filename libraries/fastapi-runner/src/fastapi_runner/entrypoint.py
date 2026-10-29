@@ -95,15 +95,18 @@ def create_app(
         A FastAPI application instance.
     """
 
+    logger = logging.getLogger(__name__)
     span = lifespan.Lifespan()
     if lifespan_generator is not None:
         for hook in lifespan_generator():
+            logger.info('Adding lifespan hook %r', hook)
             span.add_lifespan(hook)
 
     app = fastapi.FastAPI(lifespan=span, telemetry={'auto_configure': False})
 
     cors_settings = CORSSettings()
     if cors_settings.enabled:
+        logger.info('Enabling CORS middleware')
         app.add_middleware(
             fastapi.middleware.cors.CORSMiddleware,
             allow_credentials=cors_settings.allow_credentials,
@@ -128,6 +131,7 @@ def create_app(
 
     # Let the application configure its routes
     if configure is not None:
+        logger.info('Invoking application configure %r', configure)
         configure(app)
 
     # Add the problem details translator last to ensure that
