@@ -29,7 +29,7 @@ class ApplicationState(pydantic.BaseModel):
 
     This is stored as state on the Starlette application and used
     to configure library behavior. The state object is initialized
-    in [entrypoint.create_app][].
+    in [entrypoint.create_app][fastapi_runner.entrypoint.create_app].
     """
 
     error_updater: ErrorUpdater | None = None

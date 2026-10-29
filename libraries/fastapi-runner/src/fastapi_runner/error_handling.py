@@ -22,8 +22,8 @@ def set_error_updater(
 ) -> None:
     """Install an application-level custom error updater.
 
-    This hook is called to translate [ProblemDetailBody][] error
-    bodies before they are returned to the client.
+    This hook is called to translate `types.ProblemDetailBody` error bodies
+    before they are returned to the client.
     """
     app_state = state.require_application_state(app.state)
     app_state.error_updater = error_updater

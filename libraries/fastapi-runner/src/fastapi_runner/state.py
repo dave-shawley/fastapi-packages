@@ -57,7 +57,8 @@ def get_request_state(scope: starlette.types.Scope) -> types.RequestState:
     """Get request state from the ASGI scope.
 
     This will return a blank state if the ASGI scope does not
-    contain a per-request state object. Use [require_request_state][]
+    contain a per-request state object. Use
+    [require_request_state][fastapi_runner.state.require_request_state]
     if you need a reference to the per-request state.
 
     """
@@ -70,9 +71,12 @@ def get_request_state(scope: starlette.types.Scope) -> types.RequestState:
 def require_request_state(scope: starlette.types.Scope) -> types.RequestState:
     """Get the required per-request state from the ASGI scope.
 
-    This will raise a [RequestStateNotInitializedError][] if the ASGI
+    This will raise a
+    [RequestStateNotInitializedError][fastapi_runner.state.RequestStateNotInitializedError]
+    if the ASGI
     scope does not contain a per-request state object. See
-    [get_request_state][] if you always want a state object even
+    [get_request_state][fastapi_runner.state.get_request_state] if you always
+    want a state object even
     if it is blank.
 
     """
