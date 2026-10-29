@@ -2,15 +2,14 @@
 
 This repository is a monorepo for reusable FastAPI libraries and the local
 applications used to develop and demonstrate them. Reusable code lives under
-`libraries/`; applications under `apps/` are not intended to be published to
-PyPI.
+`libraries/`; tutorial applications under `tutorials/` are not intended to be
+published to PyPI.
 
 ## Repository structure
 
 ```text
 .
-├── apps/
-│   └── example-app/          # Local demo application; its own uv project
+├── tutorials/                # Local integration applications
 ├── libraries/
 │   └── fastapi-runner/       # Independently distributable library
 ├── packaging/                # Dockerfile and logging configuration
@@ -19,22 +18,15 @@ PyPI.
 └── uv.lock                   # Root workspace lockfile
 ```
 
-The root project is a non-package uv workspace. Its workspace members are the
-projects in `libraries/`. Each library has its own `pyproject.toml`, package
-metadata, source tree, tests, and README so it can be built and distributed
-independently. A future library can be added as another workspace member
-without making it part of an application distribution.
-
-`apps/example-app` is deliberately separate from the root workspace. It has
-its own `pyproject.toml` and `uv.lock`, and refers to `fastapi-runner` through a
-local path while the library is being developed. Applications are useful for
-local integration testing, examples, and container images; they are not
-workspace packages intended for PyPI.
+The root project is a non-package uv workspace. Its workspace members include
+the independently distributable libraries and the local tutorial applications.
+Each library has its own `pyproject.toml`, package metadata, source tree, tests,
+and README; tutorials are workspace applications used for integration testing,
+documentation, and container examples.
 
 The root `pyproject.toml` supplies shared development dependencies, uv
-workspace constraints, and tool configuration. The root lockfile resolves the
-workspace libraries. The example application maintains its own lockfile
-because it is an independently managed application project.
+workspace constraints, and tool configuration. The root lockfile resolves all
+workspace libraries and tutorials.
 
 ## fastapi-runner
 
@@ -75,25 +67,18 @@ libraries. `analyze` always runs Pyrefly against the complete repository
 context, even when file arguments limit the Ruff and dprint checks. `test`
 prints a coverage report when no pytest arguments are supplied.
 
-Run the example application locally with its own environment:
+Build and run the tutorial applications with Docker Compose:
 
 ```console
-cd apps/example-app
-uv sync --frozen
-APPLICATION=example-app uv run uvicorn \
-  --factory fastapi_runner.entrypoint:app_factory \
-  --log-config ../../packaging/log-config.json
+docker compose -f tutorials/compose.yaml up --build
 ```
 
-Then visit `http://127.0.0.1:8000/status` or use:
+The Compose file exposes each tutorial on a documented local port. For example,
+the CORS tutorial is available at:
 
 ```console
-curl http://127.0.0.1:8000/status
+curl http://127.0.0.1:8101/cors
 ```
-
-The example demonstrates a `configure` hook that registers the `/status`
-route and a `lifespans` hook that exposes application state through
-`fastapi_runner.lifespan.LifespanMap`.
 
 ## Building libraries
 
@@ -106,5 +91,4 @@ uv build --package=fastapi-runner --sdist --wheel --clear
 The source distribution and wheel are written to `dist/`. Library metadata,
 including its version, dependencies, and README, belongs in that library's
 directory. This keeps each workspace library suitable for a future independent
-PyPI release. `just build` currently performs this library build and also
-builds the local Docker builder and example application images.
+PyPI release. `just build` also builds the tutorial images.

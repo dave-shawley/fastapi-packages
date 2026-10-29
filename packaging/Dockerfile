@@ -13,13 +13,14 @@ ENV \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /usr/local/bin/
 COPY /pyproject.toml /uv.lock /README.md /source/
 COPY /libraries/ /source/libraries/
+COPY /tutorials/ /source/tutorials/
 RUN uv sync --directory /source --no-dev --no-default-groups --no-editable --extra otel --frozen
 
 #
 # `package-builder` stage extends the `builder` stage by installing a specific application
 #
 FROM builder AS package-builder
-ARG APP_PATH=apps
+ARG APP_PATH=tutorials
 ARG APPLICATION
 COPY $APP_PATH/$APPLICATION/ /source/$APP_PATH/$APPLICATION/
 RUN uv sync --directory /source/$APP_PATH/$APPLICATION --no-editable --frozen --no-dev --inexact

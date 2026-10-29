@@ -46,15 +46,22 @@ infer-return-types = "never"
 min-severity = "warn"
 preset = "strict"
 python-version = "3.14"
+search-path = [
+  "tutorials/access-logging",
+  "tutorials/cors",
+  "tutorials/database-lifespan",
+  "tutorials/error-reporting",
+  "tutorials/jwt",
+]
 use-ignore-files = true  # just in case someone changes the default
 
 [tool.pytest.ini_options]
 pythonpath = [
-  "apps/tutorials/tutorial-access-logging",
-  "apps/tutorials/tutorial-cors",
-  "apps/tutorials/tutorial-database-lifespan",
-  "apps/tutorials/tutorial-error-reporting",
-  "apps/tutorials/tutorial-jwt",
+  "tutorials/access-logging",
+  "tutorials/cors",
+  "tutorials/database-lifespan",
+  "tutorials/error-reporting",
+  "tutorials/jwt",
 ]
 
 [tool.ruff]
@@ -145,8 +152,11 @@ required-version = " >=0.10.0"
 
 [tool.uv.workspace]
 members = [
-  "apps/example-app",
-  "apps/tutorials/*",
+  "tutorials/access-logging",
+  "tutorials/cors",
+  "tutorials/database-lifespan",
+  "tutorials/error-reporting",
+  "tutorials/jwt",
   "libraries/fastapi-runner",
 ]
 
@@ -155,13 +165,12 @@ members = [
 # individual packages are in pypi or not. This works in
 # conjunction with tool.uv.workspace.members.
 [tool.uv.sources]
-example-app = { workspace = true }
 fastapi-runner = { workspace = true }
-tutorial-access-logging = { workspace = true }
-tutorial-cors = { workspace = true }
-tutorial-database-lifespan = { workspace = true }
-tutorial-error-reporting = { workspace = true }
-tutorial-jwt = { workspace = true }
+access-logging = { workspace = true }
+cors = { workspace = true }
+database-lifespan = { workspace = true }
+error-reporting = { workspace = true }
+jwt = { workspace = true }
 
 # since I occasiontally work inside a sandbox
 [[tool.uv.index]]

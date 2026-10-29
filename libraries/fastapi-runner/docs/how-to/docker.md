@@ -16,10 +16,10 @@ name and use `uvicorn --factory fastapi_runner.entrypoint:app_factory` as the
 command. Mount credentials as container secrets rather than baking them into
 the image.
 
-Use the repository's Docker Compose configuration for the example application
-and the tutorial smoke checks. To validate the tutorial images and run all five
+Use the repository's Docker Compose configuration for the tutorial smoke checks.
+To validate the tutorial images and run all five
 applications locally:
 
 ```console
-docker compose -f apps/tutorials/compose.yaml up --build
+docker compose -f tutorials/compose.yaml up --build
 ```

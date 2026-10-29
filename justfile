@@ -32,18 +32,18 @@ test *ARGS: setup
 build: docs setup
     uv build --package=fastapi-runner --sdist --wheel --clear
     docker build -f packaging/Dockerfile --target builder -t dave-shawley/fastapi-builder:local .
-    docker build -f packaging/Dockerfile --target webapp --build-arg APPLICATION=example-app -t dave-shawley/fastapi-example-app:local .
+    docker compose -f tutorials/compose.yaml build
 
-[doc("Run the example application in compose")]
-compose-up: _secrets
-    docker compose up -d example-app
+[doc("Run the tutorial applications in compose")]
+tutorials-up: _secrets
+    docker compose -f tutorials/compose.yaml up -d
 
-[doc("Run the example application in compose")]
-compose-down:
-    docker compose down --remove-orphans --volumes
+[doc("Stop the tutorial applications in compose")]
+tutorials-down:
+    docker compose -f tutorials/compose.yaml down --remove-orphans --volumes
 
 [doc("Remove generated files")]
-clean: compose-down
+clean: tutorials-down
     - rm -fr {{ runtime_dir }}
 
 [doc("Build documentation")]
@@ -59,7 +59,6 @@ _env:
     OTEL_LOGS_EXPORTER=none
     OTEL_METRICS_EXPORTER=none
     OTEL_TRACES_EXPORTER=none
-    FASTAPI_RUNNER_APPLICATION=example-app
     UVICORN_ACCESS_LOG=no
     UVICORN_LOG_CONFIG=packaging/log-config.json
     UVICORN_SERVER_HEADER=no

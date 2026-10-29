@@ -16,8 +16,9 @@ def authenticate(
     return claims
 ```
 
-The repository's `apps/example-app` contains the complete ES256 verification
-example, including secret-backed key configuration and `JWTClaims`.
+The repository's `tutorials/jwt` contains the complete ES256
+verification example, including secret-backed key configuration and
+`JWTClaims`.
 
 Keep token issuance, key rotation, claims policy, and authorization rules in
 the application that owns the identity system.

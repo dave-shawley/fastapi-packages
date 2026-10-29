@@ -9,14 +9,13 @@ resolution-markers = [
 
 [manifest]
 members = [
-    "example-app",
+    "access-logging",
+    "cors",
+    "database-lifespan",
+    "error-reporting",
     "fastapi-packages",
     "fastapi-runner",
-    "tutorial-access-logging",
-    "tutorial-cors",
-    "tutorial-database-lifespan",
-    "tutorial-error-reporting",
-    "tutorial-jwt",
+    "jwt",
 ]
 constraints = [
     { name = "anyio", specifier = "~=4.14" },
@@ -28,6 +27,21 @@ constraints = [
     { name = "starlette", specifier = "~=1.3" },
     { name = "uvicorn", extras = ["standard"], specifier = "~=0.49" },
     { name = "uvloop", specifier = ">=0.22.1" },
+]
+
+[[package]]
+name = "access-logging"
+version = "0.0.0"
+source = { editable = "tutorials/access-logging" }
+dependencies = [
+    { name = "fastapi-runner" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
+    { name = "uvicorn", extras = ["standard"] },
 ]
 
 [[package]]
@@ -337,6 +351,21 @@ wheels = [
 ]
 
 [[package]]
+name = "cors"
+version = "0.0.0"
+source = { editable = "tutorials/cors" }
+dependencies = [
+    { name = "fastapi-runner" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
+    { name = "uvicorn", extras = ["standard"] },
+]
+
+[[package]]
 name = "coverage"
 version = "7.17.0"
 source = { registry = "https://pypi.org/simple" }
@@ -511,6 +540,21 @@ wheels = [
 ]
 
 [[package]]
+name = "database-lifespan"
+version = "0.0.0"
+source = { editable = "tutorials/database-lifespan" }
+dependencies = [
+    { name = "fastapi-runner" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
+    { name = "uvicorn", extras = ["standard"] },
+]
+
+[[package]]
 name = "deepmerge"
 version = "4.0.0"
 source = { registry = "https://pypi.org/simple" }
@@ -529,34 +573,18 @@ wheels = [
 ]
 
 [[package]]
-name = "example-app"
+name = "error-reporting"
 version = "0.0.0"
-source = { editable = "apps/example-app" }
+source = { editable = "tutorials/error-reporting" }
 dependencies = [
     { name = "fastapi-runner" },
-    { name = "pyjwt", extra = ["crypto"] },
     { name = "uvicorn", extra = ["standard"] },
-    { name = "uvloop" },
-]
-
-[package.dev-dependencies]
-dev = [
-    { name = "pyrefly" },
-    { name = "ruff" },
 ]
 
 [package.metadata]
 requires-dist = [
     { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
-    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.15.1" },
     { name = "uvicorn", extras = ["standard"] },
-    { name = "uvloop" },
-]
-
-[package.metadata.requires-dev]
-dev = [
-    { name = "pyrefly", specifier = "~=1.2" },
-    { name = "ruff", specifier = ">=0.17.0" },
 ]
 
 [[package]]
@@ -915,6 +943,23 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/df/bf/f7da0350254c0ed7c72f3e33cef02e048281fec7ecec5f032d4aac52226b/jinja2-3.1.6.tar.gz", hash = "sha256:0137fb05990d35f1275a587e9aee6d56da821fc83491a0fb838183be43f66d6d", size = 245115, upload-time = "2025-03-05T20:05:02.478Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/62/a1/3d680cbfd5f4b8f15abc1d571870c5fc3e594bb582bc3b64ea099db13e56/jinja2-3.1.6-py3-none-any.whl", hash = "sha256:85ece4451f492d0c13c5dd7c13a64681a86afae63a5f347908daf103ce6d2f67", size = 134899, upload-time = "2025-03-05T20:05:00.369Z" },
+]
+
+[[package]]
+name = "jwt"
+version = "0.0.0"
+source = { editable = "tutorials/jwt" }
+dependencies = [
+    { name = "fastapi-runner" },
+    { name = "pyjwt", extra = ["crypto"] },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
+    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.15.1" },
+    { name = "uvicorn", extras = ["standard"] },
 ]
 
 [[package]]
@@ -1899,83 +1944,6 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ee/9f/c5201d42a484c061e528825fc8e2d565f5abd50a4ced6fb7d29c4ec99b2b/truststore-0.10.5.tar.gz", hash = "sha256:30d36967ccaded5cbb38d602c433f53600036c79d502f4533a49b60a03bbefcd", size = 28091, upload-time = "2026-10-12T22:27:31.808Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/51/e9/3a7820be2bb0fe53b6bc9c3be26d3d1158004e4c3ab953aa6840b955b1e9/truststore-0.10.5-py3-none-any.whl", hash = "sha256:9aaaedaefaf06d8b206278cf8b5012bc897f485a874503501e12d776df78951c", size = 19017, upload-time = "2026-10-12T22:27:30.377Z" },
-]
-
-[[package]]
-name = "tutorial-access-logging"
-version = "0.0.0"
-source = { editable = "apps/tutorials/tutorial-access-logging" }
-dependencies = [
-    { name = "fastapi-runner" },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
-    { name = "uvicorn", extras = ["standard"] },
-]
-
-[[package]]
-name = "tutorial-cors"
-version = "0.0.0"
-source = { editable = "apps/tutorials/tutorial-cors" }
-dependencies = [
-    { name = "fastapi-runner" },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
-    { name = "uvicorn", extras = ["standard"] },
-]
-
-[[package]]
-name = "tutorial-database-lifespan"
-version = "0.0.0"
-source = { editable = "apps/tutorials/tutorial-database-lifespan" }
-dependencies = [
-    { name = "fastapi-runner" },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
-    { name = "uvicorn", extras = ["standard"] },
-]
-
-[[package]]
-name = "tutorial-error-reporting"
-version = "0.0.0"
-source = { editable = "apps/tutorials/tutorial-error-reporting" }
-dependencies = [
-    { name = "fastapi-runner" },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
-    { name = "uvicorn", extras = ["standard"] },
-]
-
-[[package]]
-name = "tutorial-jwt"
-version = "0.0.0"
-source = { editable = "apps/tutorials/tutorial-jwt" }
-dependencies = [
-    { name = "fastapi-runner" },
-    { name = "pyjwt", extra = ["crypto"] },
-    { name = "uvicorn", extra = ["standard"] },
-]
-
-[package.metadata]
-requires-dist = [
-    { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
-    { name = "pyjwt", extras = ["crypto"], specifier = ">=2.15.1" },
-    { name = "uvicorn", extras = ["standard"] },
 ]
 
 [[package]]
