@@ -1,0 +1,16 @@
+.md-header__topic[data-md-component="header-topic"] {
+  display: none;
+}
+
+/*
+ * Material hides the first topic when the header is active, expecting the
+ * current-page topic above to replace it. Since the current-page topic is
+ * intentionally hidden, keep the site title visible instead. Recheck this
+ * rule when upgrading the theme's header implementation.
+ */
+.md-header__title .md-header__topic:first-child {
+  z-index: 0;
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(0);
+}

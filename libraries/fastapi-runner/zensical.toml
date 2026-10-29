@@ -3,7 +3,35 @@ site_name = "fastapi-runner"
 site_author = "Dave Shawley"
 repo_url = "https://github.com/dave-shawley/fastapi-packages"
 copyright = "&copy; 2026, Dave Shawley"
-nav = [{ "Home" = "index.md" }]
+extra_css = ["stylesheets/extra.css"]
+nav = [
+  { "Home" = "index.md" },
+  { "Learn" = [
+    { "Build a minimal application" = "learn/minimal-app.md" },
+  ] },
+  { "How-to guides" = [
+    { "Configure CORS" = "how-to/cors.md" },
+    { "Configure access logging" = "how-to/access-logging.md" },
+    { "Manage database connections" = "how-to/database-lifespan.md" },
+    { "Customize error reporting" = "how-to/error-reporting.md" },
+    { "Integrate JWT access tokens" = "how-to/jwt.md" },
+    { "Deploy in Docker" = "how-to/docker.md" },
+  ] },
+  { "Explanation" = [
+    { "Configuration and lifespan hooks" = "explanation/hooks.md" },
+    { "Typesafe error handlers" = "explanation/error-handlers.md" },
+    { "Typed lifespan state" = "explanation/lifespan-state.md" },
+  ] },
+  { "Reference" = [
+    { "Entrypoint" = "reference/entrypoint.md" },
+    { "Lifespan" = "reference/lifespan.md" },
+    { "State" = "reference/state.md" },
+    { "Middleware" = "reference/middleware.md" },
+    { "Errors" = "reference/errors.md" },
+    { "Error handling" = "reference/error-handling.md" },
+    { "Types" = "reference/types.md" },
+  ] },
+]
 
 [project.theme]
 language = "en"
@@ -12,7 +40,7 @@ features = [
   "navigation.instant",
   "navigation.instant.prefetch",
   "navigation.tabs",
-  "nagivation.top",
+  "navigation.top",
   "navigation.tracking",
   "toc.follow",
   "toc.integrate",
@@ -60,6 +88,7 @@ enable_inventory = true
 
 [project.plugins.mkdocstrings.handlers.python]
 inventories = ["https://docs.python.org/3/objects.inv"]
+paths = ["src"]
 
 [project.plugins.mkdocstrings.handlers.python.options]
 docstring_style = "google"
