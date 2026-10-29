@@ -48,6 +48,15 @@ preset = "strict"
 python-version = "3.14"
 use-ignore-files = true  # just in case someone changes the default
 
+[tool.pytest.ini_options]
+pythonpath = [
+  "apps/tutorials/tutorial-access-logging",
+  "apps/tutorials/tutorial-cors",
+  "apps/tutorials/tutorial-database-lifespan",
+  "apps/tutorials/tutorial-error-reporting",
+  "apps/tutorials/tutorial-jwt",
+]
+
 [tool.ruff]
 line-length = 79
 target-version = "py312"
@@ -135,7 +144,11 @@ package = false  # tell uv that the root IS NOT a package
 required-version = " >=0.10.0"
 
 [tool.uv.workspace]
-members = ["apps/example-app", "libraries/fastapi-runner"]
+members = [
+  "apps/example-app",
+  "apps/tutorials/*",
+  "libraries/fastapi-runner",
+]
 
 # sources is inherited by workspace members so they will
 # ALWAYS use the workspace sources regardless of whether
@@ -144,6 +157,11 @@ members = ["apps/example-app", "libraries/fastapi-runner"]
 [tool.uv.sources]
 example-app = { workspace = true }
 fastapi-runner = { workspace = true }
+tutorial-access-logging = { workspace = true }
+tutorial-cors = { workspace = true }
+tutorial-database-lifespan = { workspace = true }
+tutorial-error-reporting = { workspace = true }
+tutorial-jwt = { workspace = true }
 
 # since I occasiontally work inside a sandbox
 [[tool.uv.index]]

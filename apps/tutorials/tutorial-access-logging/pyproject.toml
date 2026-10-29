@@ -1,0 +1,15 @@
+[project]
+name = "tutorial-access-logging"
+version = "0.0.0"
+requires-python = ">=3.12"
+dependencies = ["fastapi-runner", "uvicorn[standard]"]
+
+[project.entry-points.fastapi_runner]
+configure = "tutorial_access_logging.app:configure"
+
+[build-system]
+requires = ["hatchling~=1.32"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tutorial_access_logging"]

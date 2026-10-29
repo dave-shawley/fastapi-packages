@@ -19,9 +19,10 @@ RUN uv sync --directory /source --no-dev --no-default-groups --no-editable --ext
 # `package-builder` stage extends the `builder` stage by installing a specific application
 #
 FROM builder AS package-builder
+ARG APP_PATH=apps
 ARG APPLICATION
-COPY apps/$APPLICATION/ /source/apps/$APPLICATION/
-RUN uv sync --directory /source/apps/$APPLICATION --no-editable --frozen --no-dev --inexact
+COPY $APP_PATH/$APPLICATION/ /source/$APP_PATH/$APPLICATION/
+RUN uv sync --directory /source/$APP_PATH/$APPLICATION --no-editable --frozen --no-dev --inexact
 
 #
 # `webapp` stage copies the installed environment discarding `/source` and other build-time artifacts

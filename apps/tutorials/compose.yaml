@@ -1,0 +1,59 @@
+services:
+  cors:
+    build:
+      context: ../..
+      dockerfile: packaging/Dockerfile
+      target: webapp
+      args:
+        APP_PATH: apps/tutorials
+        APPLICATION: tutorial-cors
+    ports: [ "8101:8000" ]
+    environment:
+      FASTAPI_RUNNER_CORS_ENABLED: "yes"
+      FASTAPI_RUNNER_CORS_ALLOW_ORIGINS: '["http://127.0.0.1"]'
+
+  access-logging:
+    build:
+      context: ../..
+      dockerfile: packaging/Dockerfile
+      target: webapp
+      args:
+        APP_PATH: apps/tutorials
+        APPLICATION: tutorial-access-logging
+    ports: [ "8102:8000" ]
+
+  database-lifespan:
+    build:
+      context: ../..
+      dockerfile: packaging/Dockerfile
+      target: webapp
+      args:
+        APP_PATH: apps/tutorials
+        APPLICATION: tutorial-database-lifespan
+    ports: [ "8103:8000" ]
+
+  error-reporting:
+    build:
+      context: ../..
+      dockerfile: packaging/Dockerfile
+      target: webapp
+      args:
+        APP_PATH: apps/tutorials
+        APPLICATION: tutorial-error-reporting
+    ports: [ "8104:8000" ]
+
+  jwt:
+    build:
+      context: ../..
+      dockerfile: packaging/Dockerfile
+      target: webapp
+      args:
+        APP_PATH: apps/tutorials
+        APPLICATION: tutorial-jwt
+    ports: [ "8105:8000" ]
+    secrets:
+      - auth_key
+
+secrets:
+  auth_key:
+    file: ../../runtime/secrets/auth_key
