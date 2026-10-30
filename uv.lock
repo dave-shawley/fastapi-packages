@@ -606,7 +606,7 @@ wheels = [
 
 [[package]]
 name = "fastapi-packages"
-version = "0.1.0"
+version = "0.0.0"
 source = { virtual = "." }
 
 [package.optional-dependencies]
@@ -648,7 +648,7 @@ dev = [
 
 [[package]]
 name = "fastapi-runner"
-version = "0.0.0"
+version = "0.1.0"
 source = { editable = "libraries/fastapi-runner" }
 dependencies = [
     { name = "fastapi" },
