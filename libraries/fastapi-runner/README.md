@@ -82,6 +82,7 @@ dependency to retrieve the value returned by a registered lifespan hook:
 ```python
 import contextlib
 import typing as t
+from collections import abc
 
 import fastapi
 
@@ -93,7 +94,7 @@ class State:
 
 
 @contextlib.asynccontextmanager
-async def state_lifespan() -> t.AsyncGenerator[State]:
+async def state_lifespan() -> abc.AsyncGenerator[State]:
     yield State()
 
 

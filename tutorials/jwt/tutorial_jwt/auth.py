@@ -1,6 +1,7 @@
 import contextlib
 import logging
 import typing as t
+from collections import abc
 
 import fastapi.security
 import jwt
@@ -55,7 +56,7 @@ class AuthState:
 
 
 @contextlib.asynccontextmanager
-async def auth_lifespan() -> t.AsyncGenerator[AuthState]:
+async def auth_lifespan() -> abc.AsyncGenerator[AuthState]:
     cfg = AuthSettings()
     state = AuthState(cfg)
     try:
