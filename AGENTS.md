@@ -133,6 +133,9 @@ its focused tests and required documentation. Do not mix dependency upgrades,
 formatting-only changes, refactors, generated artifacts, or unrelated fixes
 into one commit.
 
+Commit messages MUST use Conventional Commits format, such as
+`fix(typing): use collections.abc.AsyncGenerator`.
+
 For each commit:
 
 1. Inspect the current worktree and preserve unrelated changes.
