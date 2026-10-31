@@ -1,0 +1,74 @@
+name: bump.yml
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag name'
+        required: true
+        type: string
+      tag_body:
+        description: 'Tag commit message'
+        required: false
+        type: string
+        default: ''
+
+jobs:
+  validate-input:
+    runs-on: ubuntu-26.04
+    steps:
+      - run: |
+          if [ '${{ github.ref_name }}' != 'main' ] ; then
+            echo '::error::Only main branch is allowed to create a release'
+            exit 1
+          fi
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e #v10.3.2
+      - run: |
+          uv run --with=packaging python -c '
+            import packaging.version
+            packaging.version.Version("${{ github.event.inputs.tag }}")
+          '
+
+  create-tag:
+    runs-on: ubuntu-26.04
+    needs: [ validate-input ]
+    permissions:
+      contents: write  # allow release creation
+    env:
+      TAG_NAME: "${{ github.event.inputs.tag }}"
+      TAG_MESSAGE: "${{ github.event.inputs.tag_body }}"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e #v10.3.2
+      - name: "Create draft release"
+        env:
+          GH_TOKEN: "${{ github.token }}"
+        run: |
+          if [ -z "$TAG_MESSAGE" ] ; then
+            gh release create "$TAG_NAME" --draft --title "$TAG_NAME" --generate-notes
+          else
+            gh release create "$TAG_NAME" --draft --title "$TAG_NAME" --notes "$TAG_MESSAGE"
+          fi
+          gh release view "$TAG_NAME" --json body --jq .body > "$RUNNER_TEMP/tag_message.txt"
+      - name: "Adjust packaging metadata"
+        run: uv version "$TAG_NAME" --package=fastapi-runner
+      - name: "Commit changes and push"
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add libraries/fastapi-runner/pyproject.toml uv.lock
+          git commit -m "build(release): bump version to $TAG_NAME"
+          git tag --annotate "$TAG_NAME" -F "$RUNNER_TEMP/tag_message.txt" --cleanup=verbatim
+          git push --atomic origin main "$TAG_NAME"
+
+  finish-release:
+    runs-on: ubuntu-26.04
+    needs: [ create-tag ]
+    env:
+      TAG_NAME: "${{ github.event.inputs.tag }}"
+    permissions:
+      contents: write  # allow release edit
+    steps:
+      - name: "Finish release"
+        env:
+          GH_TOKEN: "${{ secrets.CREATE_RELEASE_TOKEN }}"
+        run: gh release edit "$TAG_NAME" --verify-tag --draft=false
