@@ -26,6 +26,9 @@ dependencies = [
   "pydantic-settings~=2.14",
 ]
 
+[project.urls]
+source = "https://github.com/dave-shawley/fastapi-packages"
+
 [dependency-groups]
 dev = [
   "mkdocs-material>=9.8.0",

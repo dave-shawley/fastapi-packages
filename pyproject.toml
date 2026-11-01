@@ -7,7 +7,7 @@ license = "BSD-3-Clause"
 authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
 
 [project.urls]
-Repository = "https://github.com/dave-shawley/fastapi-packages"
+source = "https://github.com/dave-shawley/fastapi-packages"
 
 [project.optional-dependencies]
 otel = [
