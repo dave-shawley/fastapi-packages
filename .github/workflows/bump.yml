@@ -74,14 +74,99 @@ jobs:
           gh release view "$TAG_NAME" --json body --jq .body > "$RUNNER_TEMP/tag_message.txt"
       - name: "Adjust packaging metadata"
         run: uv version "$TAG_NAME" --package=fastapi-runner
-      - name: "Commit changes and push"
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add libraries/fastapi-runner/pyproject.toml uv.lock
-          git commit -m "build(release): bump version to $TAG_NAME"
-          git tag --annotate "$TAG_NAME" -F "$RUNNER_TEMP/tag_message.txt" --cleanup=verbatim
-          git push --atomic origin main "$TAG_NAME"
+      - name: "Commit changes and create tag"
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 #v9.0.0
+        env:
+          TAG_NAME: "${{ env.TAG_NAME }}"
+        with:
+          github-token: "${{ github.token }}"
+          script: |
+            const fs = require('node:fs');
+
+            const { owner, repo } = context.repo;
+            const branch = 'main';
+            const paths = [
+              'libraries/fastapi-runner/pyproject.toml',
+              'uv.lock',
+            ];
+
+            const head = await github.graphql(`
+              query ($owner: String!, $repo: String!, $ref: String!) {
+                repository(owner: $owner, name: $repo) {
+                  ref(qualifiedName: $ref) {
+                    target { oid }
+                  }
+                }
+              }
+            `, {
+              owner,
+              repo,
+              ref: `refs/heads/${branch}`,
+            });
+
+            const expectedHeadOid = head.repository.ref?.target.oid;
+            if (!expectedHeadOid) {
+              throw new Error(`Could not resolve ${branch} HEAD`);
+            }
+
+            const additions = paths.map((path) => ({
+              path,
+              contents: fs.readFileSync(path).toString('base64'),
+            }));
+
+            const commitResult = await github.graphql(`
+              mutation ($input: CreateCommitOnBranchInput!) {
+                createCommitOnBranch(input: $input) {
+                  commit {
+                    oid
+                    url
+                    signature { isValid wasSignedByGitHub }
+                  }
+                }
+              }
+            `, {
+              input: {
+                branch: {
+                  repositoryNameWithOwner: `${owner}/${repo}`,
+                  refName: branch,
+                },
+                expectedHeadOid,
+                message: {
+                  headline: `build(release): bump version to ${process.env.TAG_NAME}`,
+                },
+                fileChanges: { additions },
+              },
+            });
+
+            const commit = commitResult.createCommitOnBranch.commit;
+            if (!commit.signature?.isValid) {
+              throw new Error('GitHub did not create a verified commit signature');
+            }
+            core.info(
+              `Created verified commit ${commit.url}`
+              + (commit.signature.wasSignedByGitHub ? ' using GitHub signing' : ''),
+            );
+
+            const tag = await github.rest.git.createTag({
+              owner,
+              repo,
+              tag: process.env.TAG_NAME,
+              message: fs.readFileSync(
+                `${process.env.RUNNER_TEMP}/tag_message.txt`,
+                'utf8',
+              ),
+              object: commit.oid,
+              type: 'commit',
+            });
+
+            await github.rest.git.createRef({
+              owner,
+              repo,
+              ref: `refs/tags/${process.env.TAG_NAME}`,
+              sha: tag.data.sha,
+            });
+
+            core.info(`Created annotated tag ${process.env.TAG_NAME}`);
 
   finish-release:
     runs-on: ubuntu-26.04
