@@ -11,6 +11,11 @@ on:
         required: false
         type: string
         default: ''
+      notes_since_tag:
+        description: 'Optional tag to generate notes based on, used as --notes-start-tag'
+        required: false
+        type: string
+        default: ''
 
 jobs:
 
@@ -44,6 +49,7 @@ jobs:
     permissions:
       contents: write  # allow release creation
     env:
+      NOTES_SINCE_TAG: "${{ github.event.inputs.notes_since_tag }}"
       TAG_NAME: "${{ needs.validate-input.outputs.version }}"
       TAG_MESSAGE: "${{ github.event.inputs.tag_body }}"
     steps:
@@ -52,12 +58,19 @@ jobs:
       - name: "Create draft release"
         env:
           GH_TOKEN: "${{ github.token }}"
+        shell: bash
         run: |
+          args=()
           if [ -z "$TAG_MESSAGE" ] ; then
-            gh release create "$TAG_NAME" --draft --title "$TAG_NAME" --generate-notes
+            args+=(--generate-notes)
+            if [ -n "$NOTES_SINCE_TAG" ] ; then
+              args+=(--notes-start-tag "$NOTES_SINCE_TAG")
+            fi
           else
-            gh release create "$TAG_NAME" --draft --title "$TAG_NAME" --notes "$TAG_MESSAGE"
+            printf '%s' "$TAG_MESSAGE" > "$RUNNER_TEMP/tag_message.txt"
+            args+=(--notes-file "$RUNNER_TEMP/tag_message.txt")
           fi
+          gh release create "$TAG_NAME" "${args[@]}" --draft --title "$TAG_NAME" --fail-on-no-commits
           gh release view "$TAG_NAME" --json body --jq .body > "$RUNNER_TEMP/tag_message.txt"
       - name: "Adjust packaging metadata"
         run: uv version "$TAG_NAME" --package=fastapi-runner
