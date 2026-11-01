@@ -16,18 +16,27 @@ jobs:
 
   validate-input:
     runs-on: ubuntu-26.04
+    outputs:
+      version: ${{ steps.parse-version.outputs.version }}
     steps:
       - run: |
-          if [ '${{ github.ref_name }}' != 'main' ] ; then
+          if [ "$GITHUB_REF_NAME" != 'main' ] ; then
             echo '::error::Only main branch is allowed to create a release'
             exit 1
           fi
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e #v10.3.2
-      - run: |
+      - id: parse-version
+        env:
+          INPUT_TAG: "${{ github.event.inputs.tag }}"
+        run: |
+          # this will fail spectacularly if the input tag cannot
+          # be parsed as a PEP-440 version number
           uv run --with=packaging python -c '
+            import os
             import packaging.version
-            packaging.version.Version("${{ github.event.inputs.tag }}")
-          '
+            v = packaging.version.Version(os.environ["INPUT_TAG"])
+            print(f"version={v}")
+          ' >> "$GITHUB_OUTPUT"
 
   create-tag:
     runs-on: ubuntu-26.04
@@ -35,7 +44,7 @@ jobs:
     permissions:
       contents: write  # allow release creation
     env:
-      TAG_NAME: "${{ github.event.inputs.tag }}"
+      TAG_NAME: "${{ needs.validate-input.outputs.version }}"
       TAG_MESSAGE: "${{ github.event.inputs.tag_body }}"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
@@ -63,9 +72,9 @@ jobs:
 
   finish-release:
     runs-on: ubuntu-26.04
-    needs: [ create-tag ]
+    needs: [ validate-input, create-tag ]
     env:
-      TAG_NAME: "${{ github.event.inputs.tag }}"
+      TAG_NAME: "${{ needs.validate-input.outputs.version }}"
     permissions:
       contents: write  # allow release edit
     steps:
