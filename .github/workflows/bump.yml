@@ -74,7 +74,8 @@ jobs:
           gh release view "$TAG_NAME" --json body --jq .body > "$RUNNER_TEMP/tag_message.txt"
       - name: "Adjust packaging metadata"
         run: uv version "$TAG_NAME" --package=fastapi-runner
-      - name: "Commit changes and create tag"
+      - id: commit_tag
+        name: "Commit changes and create tag"
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 #v9.0.0
         env:
           TAG_NAME: "${{ env.TAG_NAME }}"
@@ -167,6 +168,12 @@ jobs:
             });
 
             core.info(`Created annotated tag ${process.env.TAG_NAME}`);
+      - name: "Clean up draft release after commit or tag failure"
+        if: ${{ failure() && steps.commit_tag.outcome == 'failure' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: "${{ github.token }}"
+        run: gh release delete "$TAG_NAME" --yes
 
   finish-release:
     runs-on: ubuntu-26.04
