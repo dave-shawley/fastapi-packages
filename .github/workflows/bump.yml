@@ -128,7 +128,7 @@ jobs:
               input: {
                 branch: {
                   repositoryNameWithOwner: `${owner}/${repo}`,
-                  refName: branch,
+                  branchName: branch,
                 },
                 expectedHeadOid,
                 message: {
