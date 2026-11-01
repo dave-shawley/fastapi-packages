@@ -12,14 +12,20 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e #v10.3.2
-      - run: uv build --clear --sdist --wheel --package=fastapi-runner
+      - run: |
+          uv build --clear --sdist --wheel --package=fastapi-runner
+          uv run --package=gastapi-runner --directory=libraries/fastapi-runner zensical build --clean
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 #v7.0.2
         with:
           name: dist
           path: dist/
           if-no-files-found: error
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 #v5.0.0
+        with:
+          name: github-pages
+          path: libraries/fastapi-runner/site
 
-  publish:
+  publish-package:
     needs: build
     runs-on: ubuntu-26.04
     environment:
@@ -33,3 +39,13 @@ jobs:
           name: dist
           path: dist/
       - uses: pypa/gh-action-pypi-publish@7245906fb61fa33a13554f9d5fb856fe61758086 # v1.14.3
+
+  publish-docs:
+    needs: build
+    runs-on: ubuntu-26.04
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 #v5.0.1
