@@ -30,6 +30,9 @@ jobs:
             exit 1
           fi
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e #v10.3.2
+        with:
+          enable-cache: false
+          ignore-empty-workdir: true
       - id: parse-version
         env:
           INPUT_TAG: "${{ github.event.inputs.tag }}"
