@@ -22,7 +22,7 @@ dev = [
   "httpx2~=2.13",
   "pre-commit~=4.6",
   "pyrefly~=1.2",
-  "pytest~=9.1",
+  "pytest~=9.2",
   "ruff>=0.17.0",
   "tombi~=1.8",
 ]
