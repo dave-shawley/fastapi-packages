@@ -166,11 +166,11 @@ members = [
 # conjunction with tool.uv.workspace.members.
 [tool.uv.sources]
 fastapi-runner = { workspace = true }
-access-logging = { workspace = true }
-cors = { workspace = true }
-database-lifespan = { workspace = true }
-error-reporting = { workspace = true }
-jwt = { workspace = true }
+tutorial-access-logging = { workspace = true }
+tutorial-cors = { workspace = true }
+tutorial-database-lifespan = { workspace = true }
+tutorial-error-reporting = { workspace = true }
+tutorial-jwt = { workspace = true }
 
 # since I occasiontally work inside a sandbox
 [[tool.uv.index]]

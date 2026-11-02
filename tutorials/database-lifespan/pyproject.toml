@@ -1,5 +1,5 @@
 [project]
-name = "database-lifespan"
+name = "tutorial-database-lifespan"
 version = "0.0.0"
 requires-python = ">=3.12"
 classifiers = ["Private :: Do Not Upload"]

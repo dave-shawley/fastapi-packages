@@ -6,7 +6,8 @@ services:
       target: webapp
       args:
         APP_PATH: tutorials
-        APPLICATION: cors
+        APPLICATION: tutorial-cors
+        APPLICATION_DIRECTORY: cors
     ports: [ "8101:8000" ]
     environment:
       FASTAPI_RUNNER_CORS_ENABLED: "yes"
@@ -19,7 +20,8 @@ services:
       target: webapp
       args:
         APP_PATH: tutorials
-        APPLICATION: access-logging
+        APPLICATION: tutorial-access-logging
+        APPLICATION_DIRECTORY: access-logging
     ports: [ "8102:8000" ]
 
   database-lifespan:
@@ -29,7 +31,8 @@ services:
       target: webapp
       args:
         APP_PATH: tutorials
-        APPLICATION: database-lifespan
+        APPLICATION: tutorial-database-lifespan
+        APPLICATION_DIRECTORY: database-lifespan
     ports: [ "8103:8000" ]
 
   error-reporting:
@@ -39,7 +42,8 @@ services:
       target: webapp
       args:
         APP_PATH: tutorials
-        APPLICATION: error-reporting
+        APPLICATION: tutorial-error-reporting
+        APPLICATION_DIRECTORY: error-reporting
     ports: [ "8104:8000" ]
 
   jwt:
@@ -49,7 +53,8 @@ services:
       target: webapp
       args:
         APP_PATH: tutorials
-        APPLICATION: jwt
+        APPLICATION: tutorial-jwt
+        APPLICATION_DIRECTORY: jwt
     ports: [ "8105:8000" ]
     secrets:
       - auth_key

@@ -22,8 +22,9 @@ RUN uv sync --directory /source --no-dev --no-default-groups --no-editable --ext
 FROM builder AS package-builder
 ARG APP_PATH=tutorials
 ARG APPLICATION
-COPY $APP_PATH/$APPLICATION/ /source/$APP_PATH/$APPLICATION/
-RUN uv sync --directory /source/$APP_PATH/$APPLICATION --no-editable --frozen --no-dev --inexact
+ARG APPLICATION_DIRECTORY
+COPY $APP_PATH/$APPLICATION_DIRECTORY/ /source/$APP_PATH/$APPLICATION_DIRECTORY/
+RUN uv sync --directory /source/$APP_PATH/$APPLICATION_DIRECTORY --no-editable --frozen --no-dev --inexact
 
 #
 # `webapp` stage copies the installed environment discarding `/source` and other build-time artifacts
