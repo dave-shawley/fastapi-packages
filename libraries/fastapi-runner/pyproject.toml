@@ -35,7 +35,7 @@ dev = [
   "mkdocs-material>=9.8.0",
   "mkdocstrings[python]>=1.0.8",
   "pymdown-ietflinks>=0.0.0",
-  "zensical>=0.0.72",
+  "zensical>=0.0.74",
 ]
 
 [build-system]
