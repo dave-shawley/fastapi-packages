@@ -11,9 +11,9 @@ source = "https://github.com/dave-shawley/fastapi-packages"
 
 [project.optional-dependencies]
 otel = [
-  "opentelemetry-distro>=0.66b1",
-  "opentelemetry-exporter-otlp>=1.45.1",
-  "opentelemetry-exporter-otlp-proto-http>=1.45.1",
+  "opentelemetry-distro>=0.66b2",
+  "opentelemetry-exporter-otlp>=1.45.2",
+  "opentelemetry-exporter-otlp-proto-http>=1.45.2",
 ]
 
 [dependency-groups]
@@ -22,13 +22,13 @@ dev = [
   "httpx2~=2.13",
   "pre-commit~=4.6",
   "pyrefly~=1.2",
-  "pytest~=9.1",
-  "ruff>=0.17.0",
+  "pytest~=9.2",
+  "ruff>=0.17.3",
   "tombi~=1.8",
 ]
 
 [build-system]
-requires = ["hatchling~=1.32"]
+requires = ["hatchling~=1.33"]
 build-backend = "hatchling.build"
 
 [tool.coverage.report]
