@@ -39,7 +39,7 @@ jobs:
         run: |
           # this will fail spectacularly if the input tag cannot
           # be parsed as a PEP-440 version number
-          uv run --with=packaging python -c '
+          uv run --with='packaging~=26.3' --no-build python -c '
             import os
             import packaging.version
             v = packaging.version.Version(os.environ["INPUT_TAG"])
@@ -76,7 +76,7 @@ jobs:
           gh release create "$TAG_NAME" "${args[@]}" --draft --title "$TAG_NAME" --fail-on-no-commits
           gh release view "$TAG_NAME" --json body --jq .body > "$RUNNER_TEMP/tag_message.txt"
       - name: "Adjust packaging metadata"
-        run: uv version "$TAG_NAME" --package=fastapi-runner
+        run: uv version "$TAG_NAME" --package=fastapi-runner --no-build
       - id: commit_tag
         name: "Commit changes and create tag"
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 #v9.0.0
