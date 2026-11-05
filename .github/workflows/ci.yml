@@ -42,4 +42,43 @@ jobs:
           uv sync --all-extras --all-groups --all-packages --frozen
           uv run coverage run -m pytest
           uv run coverage report
-          uv run coverage xml 
+          uv run coverage xml
+
+  sonar-check:
+    runs-on: ubuntu-latest
+    outputs:
+      enabled: ${{ steps.check.outputs.enabled }}
+    steps:
+      - id: check
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        run: |
+          if [ -n "$SONAR_TOKEN" ] ; then
+            echo 'enabled=true' >>"$GITHUB_OUTPUT"
+          else
+            echo 'enabled=false' >>"$GITHUB_OUTPUT"
+          fi
+
+  sonar-analysis:
+    runs-on: ubuntu-26.04
+    needs: [ sonar-check ]
+    if: ${{ needs.sonar-check.outputs.enabled == 'true' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 #v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Cache SonarQube packages
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 #v10.3.3
+      - run: |
+          uv sync --all-extras --all-groups --all-packages --frozen
+          uv run coverage run -m pytest
+          uv run coverage xml
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@4d1dc0c91ee400dcf8a6dddf2f705ac36542e304 # v8.4.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
