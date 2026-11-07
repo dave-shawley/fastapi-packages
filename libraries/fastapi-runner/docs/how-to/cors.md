@@ -1,8 +1,10 @@
 # Configure CORS
 
 `create_app()` installs CORS middleware from the `FASTAPI_RUNNER_CORS_`
-settings namespace. The defaults are restrictive: CORS is enabled, but no
-origins, methods, or headers are allowed until configured.
+settings namespace. CORS is enabled automatically when at least one origin is
+configured. With no origins, the middleware is disabled because it could not
+serve a cross-origin browser client. Set `FASTAPI_RUNNER_CORS_ENABLED=true` to
+explicitly enable it, or `false` to disable it, regardless of the origin list.
 
 For a local frontend, configure the application environment like this:
 

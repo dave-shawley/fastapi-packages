@@ -115,7 +115,7 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
 
         distribution.assert_called_once_with('github-runner')
 
-    def test_app_factory_configures_app_and_adds_middleware(
+    def test_app_factory_configures_app_without_cors_origins(
         self,
     ) -> None:
         configured_apps: list[fastapi.FastAPI] = []
@@ -156,38 +156,12 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
                 for middleware_config in app.user_middleware
             },
             {
-                cors.CORSMiddleware,
                 middleware.AccessLogMiddleware,
                 middleware.RequestStateMiddleware,
             },
         )
         for middleware_config in app.user_middleware:
             match middleware_config.cls:
-                case cors.CORSMiddleware:
-                    settings: abc.Mapping[str, bool | int | list[str]] = {
-                        'allow_credentials': False,
-                        'allow_headers': [],
-                        'allow_origins': [],
-                        'allow_private_network': False,
-                        'expose_headers': [],
-                        'max_age': 600,
-                    }
-                    for key, value in settings.items():
-                        self.assertEqual(
-                            middleware_config.kwargs[key],
-                            value,
-                            f'Unexpected value for {key}',
-                        )
-                    self.assertSetEqual(
-                        set(
-                            t.cast(
-                                'list[str]',
-                                middleware_config.kwargs['allow_methods'],
-                            )
-                        ),
-                        {'DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'OPTIONS'},
-                        'Unexpected allow_methods',
-                    )
                 case middleware.AccessLogMiddleware:
                     self.assertEqual(
                         middleware_config.kwargs['ignored_paths'],
@@ -199,6 +173,87 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
                     self.fail(
                         f'Unexpected middleware class: {middleware_config.cls}'
                     )
+
+    def test_app_factory_enables_cors_when_origins_are_configured(
+        self,
+    ) -> None:
+        def configure(_app: fastapi.FastAPI) -> None:
+            pass
+
+        entry_points = FakeEntryPoints(configure=FakeEntryPoint(configure))
+
+        with (
+            mock.patch.dict(
+                'os.environ',
+                {
+                    'FASTAPI_RUNNER_APPLICATION': 'github-runner',
+                    'FASTAPI_RUNNER_CORS_ALLOW_ORIGINS': '["https://example.com"]',
+                },
+            ),
+            mock.patch.object(
+                entrypoint.metadata,
+                'distribution',
+                return_value=FakeDistribution(entry_points),
+            ),
+        ):
+            app = entrypoint.app_factory()
+
+        cors_middleware = next(
+            middleware_config
+            for middleware_config in app.user_middleware
+            if middleware_config.cls is cors.CORSMiddleware
+        )
+        settings: abc.Mapping[str, bool | int | list[str]] = {
+            'allow_credentials': False,
+            'allow_headers': [],
+            'allow_origins': ['https://example.com'],
+            'allow_private_network': False,
+            'expose_headers': [],
+            'max_age': 600,
+        }
+        for key, value in settings.items():
+            self.assertEqual(
+                cors_middleware.kwargs[key],
+                value,
+                f'Unexpected value for {key}',
+            )
+        self.assertSetEqual(
+            set(t.cast('list[str]', cors_middleware.kwargs['allow_methods'])),
+            {'DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'OPTIONS'},
+            'Unexpected allow_methods',
+        )
+
+    def test_app_factory_allows_explicit_cors_enable_without_origins(
+        self,
+    ) -> None:
+        def configure(_app: fastapi.FastAPI) -> None:
+            pass
+
+        entry_points = FakeEntryPoints(configure=FakeEntryPoint(configure))
+
+        with (
+            mock.patch.dict(
+                'os.environ',
+                {
+                    'FASTAPI_RUNNER_APPLICATION': 'github-runner',
+                    'FASTAPI_RUNNER_CORS_ENABLED': 'yes',
+                },
+            ),
+            mock.patch.object(
+                entrypoint.metadata,
+                'distribution',
+                return_value=FakeDistribution(entry_points),
+            ),
+        ):
+            app = entrypoint.app_factory()
+
+        self.assertIn(
+            cors.CORSMiddleware,
+            {
+                middleware_config.cls
+                for middleware_config in app.user_middleware
+            },
+        )
 
     async def test_app_factory_registers_lifespan_hooks(self) -> None:
         entered: list[str] = []
@@ -287,6 +342,7 @@ class EntryPointTests(unittest.IsolatedAsyncioTestCase):
                 {
                     'FASTAPI_RUNNER_APPLICATION': 'github-runner',
                     'FASTAPI_RUNNER_CORS_ENABLED': 'no',
+                    'FASTAPI_RUNNER_CORS_ALLOW_ORIGINS': '["https://example.com"]',
                 },
             ),
             mock.patch.object(
