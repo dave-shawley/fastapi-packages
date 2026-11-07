@@ -2,6 +2,7 @@
 /build
 /dist
 /runtime
+!/.coderabbit.yaml
 !/.github
 !/.gitignore
 !/libraries/fastapi-runner/.gitignore
