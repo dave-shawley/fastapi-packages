@@ -43,5 +43,6 @@ FASTAPI_RUNNER_APPLICATION=my-app \
 
 The [Learn](learn/minimal-app.md) tutorial builds this application from
 scratch. The [How-to guides](how-to/cors.md) cover the individual integration
-points, while [Reference](reference/entrypoint.md) documents the supported
-symbols.
+points, while [Reference](reference/environment.md) documents the supported
+environment variables and [the API reference](reference/entrypoint.md)
+documents the supported symbols.
