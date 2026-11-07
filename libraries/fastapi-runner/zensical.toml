@@ -23,6 +23,7 @@ nav = [
     { "Typed lifespan state" = "explanation/lifespan-state.md" },
   ] },
   { "Reference" = [
+    { "Environment variables" = "reference/environment.md" },
     { "Entrypoint" = "reference/entrypoint.md" },
     { "Lifespan" = "reference/lifespan.md" },
     { "State" = "reference/state.md" },

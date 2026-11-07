@@ -1,0 +1,25 @@
+# yaml-language-server: $schema=https://www.coderabbit.ai/integrations/schema.v2.json
+# $schema: https://www.coderabbit.ai/integrations/schema.v2.json
+reviews:
+  profile: chill
+  path_instructions:
+    - path: "libraries/fastapi-runner/**"
+      instructions: |
+        - Focus on code quality and readability
+        - Ensure the public API surface is well-documented
+        - Ensure that the features are described in the generated documentation
+        - Ensure that each feature is explained in a tutorial
+    - path: "tutorials/**"
+      instructions: |
+        - Focus on code simplicity and readability
+        - Tutorials should be concise and easy to follow
+        - Each tutorial is included in the compose.yaml specification
+        - Each tutorial is described in the generated documentation
+  pre_merge_checks:
+    docstrings:
+      mode: off
+  tools:
+    flake8: # included in CI ruff check
+      enabled: false
+    ruff: # enforced as part of CI
+      enabled: false

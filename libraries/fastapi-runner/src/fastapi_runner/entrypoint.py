@@ -19,6 +19,8 @@ class ApplicationSettings(pydantic_settings.BaseSettings):
 
 
 class CORSSettings(pydantic_settings.BaseSettings):
+    """CORS settings loaded from the FASTAPI_RUNNER_CORS_ namespace."""
+
     model_config = {'env_prefix': 'FASTAPI_RUNNER_CORS_'}
     allow_credentials: bool = False
     allow_headers: list[str] = []
@@ -32,9 +34,16 @@ class CORSSettings(pydantic_settings.BaseSettings):
     ]
     allow_origins: list[str] = []
     allow_private_network: bool = False
-    enabled: bool = True
+    enabled: bool | None = None
     expose_headers: list[str] = []
     max_age: int = 600
+
+    @pydantic.model_validator(mode='after')
+    def default_enabled_from_origins(self) -> t.Self:
+        """Enable CORS by default only when it has an allowed origin."""
+        if self.enabled is None:
+            self.enabled = bool(self.allow_origins)
+        return self
 
 
 ConfigHook = abc.Callable[[fastapi.FastAPI], None]
