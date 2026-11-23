@@ -3,6 +3,9 @@ from collections import abc
 
 import fastapi
 import pydantic
+import starlette.datastructures
+from pydantic import annotated_handlers, json_schema
+from pydantic_core import core_schema
 
 
 class ProblemDetailBody(pydantic.BaseModel):
@@ -45,3 +48,40 @@ class RequestState(t.TypedDict, total=False):
 
     principal_id: str | None
     disable_access_log: t.NotRequired[bool]
+
+
+def _validate_starlette_url(
+    value: str | starlette.datastructures.URL,
+) -> starlette.datastructures.URL:
+    match value:
+        case str():
+            return starlette.datastructures.URL(value)
+        case starlette.datastructures.URL():
+            return value
+        case _:
+            raise ValueError('Value must be a string or starlette URL')
+
+
+def _get_starlette_core_schema(
+    _typ: type, _handler: annotated_handlers.GetCoreSchemaHandler
+) -> core_schema.CoreSchema:
+    validator = core_schema.no_info_plain_validator_function(
+        _validate_starlette_url
+    )
+    return core_schema.json_or_python_schema(
+        validator, validator, serialization=core_schema.to_string_ser_schema()
+    )
+
+
+def _get_starlette_json_schema(
+    _typ: type, _handler: annotated_handlers.GetJsonSchemaHandler
+) -> json_schema.JsonSchemaValue:
+    return {'type': 'string', 'format': 'uri'}
+
+
+StarletteUrl = t.Annotated[
+    starlette.datastructures.URL,
+    pydantic.GetPydanticSchema(
+        _get_starlette_core_schema, _get_starlette_json_schema
+    ),
+]

@@ -9,9 +9,11 @@ resolution-markers = [
 
 [manifest]
 members = [
+    "fastapi-oauth-jwt",
     "fastapi-packages",
     "fastapi-runner",
     "tutorial-access-logging",
+    "tutorial-authorization-server",
     "tutorial-cors",
     "tutorial-database-lifespan",
     "tutorial-error-reporting",
@@ -543,6 +545,35 @@ sdist = { url = "https://files.pythonhosted.org/packages/e9/eb/2cf8c80abf09b2800
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b4/4f/3f2c25c9b43970b5e9a08beb5e04776247edea684ddc0930f4f02f0bb6cb/fastapi-0.162.0-py3-none-any.whl", hash = "sha256:3785963de305dd09912426cb81f2d230fce98ab3521cdfe97265c8d14983128c", size = 148912, upload-time = "2026-10-23T18:47:31.734Z" },
 ]
+
+[[package]]
+name = "fastapi-oauth-jwt"
+version = "0.0.0"
+source = { editable = "libraries/fastapi-oauth-jwt" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "fastapi" },
+    { name = "pydantic" },
+    { name = "pydantic-settings" },
+]
+
+[package.optional-dependencies]
+fastapi-runner = [
+    { name = "fastapi-runner" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "cryptography", specifier = "~=50.0" },
+    { name = "fastapi", specifier = "~=0.162.0" },
+    { name = "fastapi-runner", marker = "extra == 'fastapi-runner'", editable = "libraries/fastapi-runner" },
+    { name = "pydantic", specifier = "~=2.14" },
+    { name = "pydantic-settings", specifier = "~=2.16" },
+]
+provides-extras = ["fastapi-runner"]
+
+[package.metadata.requires-dev]
+dev = []
 
 [[package]]
 name = "fastapi-packages"
@@ -1656,6 +1687,15 @@ wheels = [
 ]
 
 [[package]]
+name = "python-multipart"
+version = "0.0.34"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/7e/c0/c753d487a83d873f6946cee6cbc26cea3fe59a476ad0de99a14938a2fbd8/python_multipart-0.0.34.tar.gz", hash = "sha256:b998ae90ca6e1e363261ce2e0e230281b8af53867b757970abd69ee9edcd843a", size = 52456, upload-time = "2026-11-16T10:40:38.261Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/f5/0e/090c52b122d8ec5fa37942c1410fea9cf04ce98bca0c84dde7f0aa11594d/python_multipart-0.0.34-py3-none-any.whl", hash = "sha256:ebacd224bd686eee2f9aa1066a657affe07435a185834e05e5235e2e59173e91", size = 32585, upload-time = "2026-11-16T10:40:37.119Z" },
+]
+
+[[package]]
 name = "pyyaml"
 version = "6.0.3"
 source = { registry = "https://pypi.org/simple" }
@@ -1881,6 +1921,27 @@ dependencies = [
 [package.metadata]
 requires-dist = [
     { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
+    { name = "uvicorn", extras = ["standard"] },
+]
+
+[[package]]
+name = "tutorial-authorization-server"
+version = "0.0.0"
+source = { editable = "tutorials/authorization-server" }
+dependencies = [
+    { name = "fastapi-runner" },
+    { name = "pydantic" },
+    { name = "pyjwt", extra = ["crypto"] },
+    { name = "python-multipart" },
+    { name = "uvicorn", extra = ["standard"] },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "fastapi-runner", editable = "libraries/fastapi-runner" },
+    { name = "pydantic" },
+    { name = "pyjwt", extras = ["crypto"], specifier = "~=2.15" },
+    { name = "python-multipart", specifier = ">=0.0.34" },
     { name = "uvicorn", extras = ["standard"] },
 ]
 

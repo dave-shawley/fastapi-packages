@@ -48,6 +48,7 @@ preset = "strict"
 python-version = "3.14"
 search-path = [
   "tutorials/access-logging",
+  "tutorials/authorization-server",
   "tutorials/cors",
   "tutorials/database-lifespan",
   "tutorials/error-reporting",
@@ -58,6 +59,7 @@ use-ignore-files = true  # just in case someone changes the default
 [tool.pytest.ini_options]
 pythonpath = [
   "tutorials/access-logging",
+  "tutorials/authorization-server",
   "tutorials/cors",
   "tutorials/database-lifespan",
   "tutorials/error-reporting",
@@ -152,12 +154,14 @@ required-version = " >=0.10.0"
 
 [tool.uv.workspace]
 members = [
+  "libraries/fastapi-oauth-jwt",
+  "libraries/fastapi-runner",
   "tutorials/access-logging",
+  "tutorials/authorization-server",
   "tutorials/cors",
   "tutorials/database-lifespan",
   "tutorials/error-reporting",
   "tutorials/jwt",
-  "libraries/fastapi-runner",
 ]
 
 # sources is inherited by workspace members so they will
@@ -165,8 +169,10 @@ members = [
 # individual packages are in pypi or not. This works in
 # conjunction with tool.uv.workspace.members.
 [tool.uv.sources]
+fastapi-oauth-jwt = { workspace = true }
 fastapi-runner = { workspace = true }
 tutorial-access-logging = { workspace = true }
+tutorial-authorization-server = { workspace = true }
 tutorial-cors = { workspace = true }
 tutorial-database-lifespan = { workspace = true }
 tutorial-error-reporting = { workspace = true }

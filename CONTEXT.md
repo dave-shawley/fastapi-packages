@@ -1,8 +1,9 @@
 # fastapi-runner
 
-This context describes the vocabulary used by the reusable FastAPI runner and
-its documentation. It distinguishes application-owned behavior from the
-library's shared lifecycle, state, error, and logging contracts.
+This context describes the vocabulary used by the reusable FastAPI runner,
+OAuth JWT library, and their tutorial applications. It distinguishes
+application-owned behavior from shared lifecycle, authentication, state,
+error, and logging contracts.
 
 ## Application integration
 
@@ -57,3 +58,37 @@ _Avoid_: error payload, exception body
 The structured record emitted for a served HTTP request, including request,
 response, duration, and optional principal information.
 _Avoid_: audit log, authentication log
+
+## OAuth JWT authentication
+
+**Authorization server**:
+The OAuth server that issues authorization grants and access tokens for a
+trusted issuer and publishes the metadata or keys needed to verify them.
+_Avoid_: identity provider, authentication service
+
+**Trusted issuer**:
+An authorization server identified by an exact `iss` value whose access tokens
+and verification keys the application has explicitly chosen to accept.
+_Avoid_: issuer URL, trusted identity provider
+
+**Discovery mode**:
+The configured method for retrieving verification information for a trusted
+issuer: OAuth authorization-server metadata or a direct JWKS document.
+_Avoid_: issuer locator, automatic discovery
+
+**Token profile**:
+The set of header, claim, cryptographic, and temporal requirements selected by
+an access token's `typ` value, such as the initial `at+jwt` profile.
+_Avoid_: token flavor, JWT mode
+
+**Validated access token**:
+A bearer JWT whose profile, issuer, audience, signature, required claims, and
+temporal validity have passed the library's checks; it is not an authorization
+decision.
+_Avoid_: authorized token, authenticated user
+
+**Key snapshot**:
+A complete set of verification keys retrieved together for one trusted issuer,
+with retrieval metadata and a validity interval that determine whether it may
+be used.
+_Avoid_: key list, stale key cache

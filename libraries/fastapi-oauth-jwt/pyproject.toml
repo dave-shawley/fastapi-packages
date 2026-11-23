@@ -1,0 +1,46 @@
+[project]
+name = "fastapi-oauth-jwt"
+version = "0.0.0"
+description = "Middleware implementation of the JWT profile for OAuth 2 Access Tokens"
+readme = "README.md"
+license = "BSD-3-Clause"
+authors = [{ name = "Dave Shawley", email = "daveshawley@gmail.com" }]
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Framework :: FastAPI",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3 :: Only",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: 3.15",
+  "Topic :: Software Development :: Libraries",
+  "Typing :: Typed",
+]
+dependencies = [
+  "cryptography~=50.0",
+  "fastapi~=0.162.0",
+  "pydantic~=2.14",
+  "pydantic-settings~=2.16",
+]
+
+[project.urls]
+documentation = "https://dave-shawley.github.io/fastapi-packages/"
+source = "https://github.com/dave-shawley/fastapi-packages"
+
+[project.optional-dependencies]
+fastapi-runner = [
+  "fastapi-runner>=0.2",
+]
+
+[dependency-groups]
+dev = []
+
+[build-system]
+requires = ["hatchling~=1.33"]
+build-backend = "hatchling.build"
+
+[tool.uv.sources]
+fastapi-runner = { workspace = true }
