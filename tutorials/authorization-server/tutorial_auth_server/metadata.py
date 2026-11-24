@@ -33,7 +33,6 @@ async def auth_server_metadata(request: fastapi.Request) -> ServerMetadata:
             'jwks_uri': request.url_for('jwks'),
             'response_types_supported': ['code'],
             'scopes_supported': [],
-            'token_endpoint_auth_signing_alg_values_supported': ['ES256'],
             'token_endpoint_auth_methods_supported': ['client_secret_basic'],
         }
     )
