@@ -32,7 +32,7 @@ source = "https://github.com/dave-shawley/fastapi-packages"
 
 [dependency-groups]
 dev = [
-  "mkdocs-material>=9.8.0",
+  "mkdocs-material>=9.8.2",
   "mkdocstrings[python]>=1.0.8",
   "pymdown-ietflinks>=0.0.0",
   "zensical>=0.0.74",
