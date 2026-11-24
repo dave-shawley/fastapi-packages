@@ -7,7 +7,7 @@ import urllib.parse
 import pydantic
 import pydantic_settings
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import ec
+from cryptography.hazmat.primitives.asymmetric import ec, rsa
 
 from tutorial_auth_server import types
 
@@ -50,11 +50,15 @@ class AuthSettings(pydantic_settings.BaseSettings):
     @functools.cached_property
     def signing_key(self) -> types.SupportKeyTypes:
         """JWK representation of the signing key"""
+        key_model: type[types.SupportKeyTypes]
+        jwk: dict[str, str]
+
         key = serialization.load_pem_private_key(
             self.key.get_secret_value().encode('ascii'), password=None
         )
         match key:
             case ec.EllipticCurvePrivateKey():
+                key_model = types.EllipticalCurveKey
                 pub_key = key.public_key()
                 numbers = pub_key.public_numbers()
                 jwk = {
@@ -63,14 +67,25 @@ class AuthSettings(pydantic_settings.BaseSettings):
                     'x': _b64url(numbers.x.to_bytes(32, 'big')),
                     'y': _b64url(numbers.y.to_bytes(32, 'big')),
                 }
-                canonical = json.dumps(
-                    jwk, sort_keys=True, separators=(',', ':')
-                ).encode('utf-8')
-                digest = hashes.Hash(hashes.SHA256())
-                digest.update(canonical)
-                kid = _b64url(digest.finalize())
-                return types.EllipticalCurveKey.model_validate(
-                    {'kid': kid, 'use': 'sig', **jwk}
-                )
+
+            case rsa.RSAPrivateKey():
+                key_model = types.RSAKey
+                pub_key = key.public_key()
+                numbers = pub_key.public_numbers()
+                mod_len = max(1, (numbers.n.bit_length() + 7) // 8)
+                jwk = {
+                    'e': _b64url(numbers.e.to_bytes(3, 'big')),
+                    'kty': 'RSA',
+                    'n': _b64url(numbers.n.to_bytes(mod_len, 'big')),
+                }
+
             case _ as unexpected:
                 raise RuntimeError(f'Unexpected key type: {unexpected!r}')
+
+        canonical = json.dumps(
+            jwk, sort_keys=True, separators=(',', ':')
+        ).encode('utf-8')
+        digest = hashes.Hash(hashes.SHA256())
+        digest.update(canonical)
+        kid = _b64url(digest.finalize())
+        return key_model.model_validate({'kid': kid, 'use': 'sig', **jwk})

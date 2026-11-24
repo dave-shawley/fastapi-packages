@@ -71,4 +71,7 @@ _env:
     mkdir -p {{ secrets_dir }}
     test -e {{ secrets_dir / 'auth_key' }} || openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:prime256v1 -out {{ secrets_dir / 'auth_key' }}
     chmod 0600 {{ secrets_dir / 'auth_key' }}
-    test -e {{ secrets_dir / 'auth_key.pub' }} || openssl pkey -in runtime/secrets/auth_key -pubout -out {{ secrets_dir / 'auth_key.pub' }}
+    test -e {{ secrets_dir / 'auth_key.pub' }} || openssl pkey -in {{ secrets_dir / 'auth_key' }} -pubout -out {{ secrets_dir / 'auth_key.pub' }}
+    test -e {{ secrets_dir / 'auth_key_rsa' }} || openssl genpkey -algorithm RSA -pkeyopt bits:4096 -out {{ secrets_dir / 'auth_key_rsa' }} >/dev/null
+    chmod 0600 {{ secrets_dir / 'auth_key_rsa' }}
+    test -e {{ secrets_dir / 'auth_key_rsa.pub' }} || openssl pkey -in {{ secrets_dir / 'auth_key_rsa' }} -pubout -out {{ secrets_dir / 'auth_key_rsa.pub' }}

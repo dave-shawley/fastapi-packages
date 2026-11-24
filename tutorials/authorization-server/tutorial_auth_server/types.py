@@ -24,7 +24,8 @@ class EllipticalCurveKey(KeyMetadata[t.Literal['EC']]):
 
 
 class RSAKey(KeyMetadata[t.Literal['RSA']]):
-    pass
+    n: str
+    e: str
 
 
 SupportKeyTypes = t.Annotated[
